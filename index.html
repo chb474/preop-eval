@@ -591,6 +591,7 @@ const DB_NAME = 'PreOpEvalDB';
 const DB_VER = 1;
 const STORE = 'patients';
 
+let _db = null;
 function openDB() {
   return new Promise((resolve, reject) => {
     const req = indexedDB.open(DB_NAME, DB_VER);
@@ -607,6 +608,8 @@ function openDB() {
     req.onerror = e => reject(e.target.error);
   });
 }
+
+const dbReady = openDB().then(function(db) { _db = db; return db; });
 
 async function dbAdd(patient) {
   const db = await openDB();
@@ -639,7 +642,7 @@ async function dbDelete(id) {
 }
 
 async function dbGetAll() {
-  const db = await openDB();
+  const db = await dbReady;
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE, 'readonly');
     const req = tx.objectStore(STORE).getAll();
@@ -649,7 +652,7 @@ async function dbGetAll() {
 }
 
 async function dbGet(id) {
-  const db = await openDB();
+  const db = await dbReady;
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE, 'readonly');
     const req = tx.objectStore(STORE).get(id);
@@ -1872,7 +1875,7 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-renderList();
+dbReady.then(function() { renderList(); });
 </script>
 </body>
 </html>
