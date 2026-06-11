@@ -1330,16 +1330,50 @@ async function viewPatient(id) {
   document.getElementById('detailModal').classList.remove('hidden');
 }
 
-function renderUltrasoundHtml(exam, idx) {
+function renderUltrasoundHtml(exam, idx, isFirst) {
   var u = exam.data || exam;
-  var h = '';
-  h += '<div style="margin-top:12px;border:1px solid #e0e7ef;border-radius:10px;padding:12px;background:#fafcff">';
-  h += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">';
-  h += '<span style="font-size:14px;font-weight:600;color:#1a73e8">📅 ' + (exam.date || '未知日期') + '</span>';
-  if (idx !== undefined) {
-    h += '<span style="font-size:11px;color:#999">第' + (idx+1) + '次</span>';
+  // 最新一条：完整显示
+  if (isFirst) {
+    var h = '<div style="margin-top:12px;border:1px solid #e0e7ef;border-radius:10px;padding:12px;background:#fafcff">';
+    h += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">';
+    h += '<span style="font-size:14px;font-weight:600;color:#1a73e8">📅 ' + (exam.date || '未知日期') + '</span>';
+    h += '<span style="font-size:11px;color:#1a73e8;background:#e8f0fe;padding:2px 8px;border-radius:8px">最新评估</span>';
+    h += '</div>';
+    h += _renderUsTable(u);
+    h += '</div>';
+    return h;
   }
+  // 历史记录：折叠显示，点击日期展开
+  var id = 'us_' + (idx || '0');
+  var displayStyle = _expandedUsId === id ? 'block' : 'none';
+  var arrowStyle = _expandedUsId === id ? '▼' : '▶';
+  var h = '<div style="margin-top:6px;border:1px solid #e8ecf0;border-radius:8px;overflow:hidden">';
+  h += '<div onclick=_toggleUs(\"' + id + '\") style="padding:10px 12px;background:#f5f7fa;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none">';
+  h += '<span style="font-size:13px;color:#333;font-weight:500">' + arrowStyle + ' 📅 ' + (exam.date || '未知日期') + '</span>';
+  h += '<span style="font-size:11px;color:#999">点击展开</span>';
   h += '</div>';
+  h += '<div id="' + id + '" style="padding:12px;display:' + displayStyle + '">';
+  h += _renderUsTable(u);
+  h += '</div></div>';
+  return h;
+}
+
+var _expandedUsId = null;
+
+function _toggleUs(id) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  if (el.style.display === 'none') {
+    el.style.display = 'block';
+    _expandedUsId = id;
+  } else {
+    el.style.display = 'none';
+    _expandedUsId = null;
+  }
+}
+
+function _renderUsTable(u) {
+  var h = '';
   // 动脉
   var arteryFields = [['肱动脉内径','ba_l','ba_r'],['肱动脉血流量','bf_l','bf_r'],['桡动脉起始段内径','ra_prox_l','ra_prox_r'],['桡动脉远端内径','ra_dist_l','ra_dist_r'],['尺动脉起始段内径','ua_prox_l','ua_prox_r'],['尺动脉远端内径','ua_dist_l','ua_dist_r'],['动脉斑块/钙化','plaque_l','plaque_r'],['动脉狭窄部位','sten_l','sten_r'],['Allen试验','allen_l','allen_r']];
   h += '<div style="font-size:12px;color:#1a73e8;font-weight:500;margin-bottom:4px">动脉</div><table class="sub-table"><tr><th>项目</th><th>左侧</th><th>右侧</th></tr>';
@@ -1357,7 +1391,7 @@ function renderUltrasoundHtml(exam, idx) {
     if (vl2 == '-' && vr2 == '-') continue;
     h += '<tr><td>' + veinFields[j][0] + '</td><td>' + vl2 + '</td><td>' + vr2 + '</td></tr>';
   }
-  h += '</table></div>';
+  h += '</table>';
   return h;
 }
 
@@ -1434,11 +1468,18 @@ function closeUltrasoundForm() {
     // 向后兼容：旧格式转成数组
     ultrasoundExams = [{date: p.date || '未知日期', data: p.ultrasound}];
   }
+  // 按日期降序排列（最新在前）
+  ultrasoundExams.sort(function(a, b) {
+    var da = a.date || '', db = b.date || '';
+    if (da > db) return -1;
+    if (da < db) return 1;
+    return 0;
+  });
   if (ultrasoundExams.length > 0) {
     html += '<div class="section-sub">🩸 血管超声评估 <span style="font-size:12px;color:#8e99a8;font-weight:400">共' + ultrasoundExams.length + '次</span></div>';
     html += '<div class="card">';
     for (var ei = 0; ei < ultrasoundExams.length; ei++) {
-      html += renderUltrasoundHtml(ultrasoundExams[ei], ei);
+      html += renderUltrasoundHtml(ultrasoundExams[ei], ei, ei === 0);
     }
     html += '<button onclick="addUltrasoundExam(' + p.id + ')" style="width:100%;margin-top:10px;padding:10px;border:1.5px dashed #1a73e8;border-radius:10px;background:#f0f6ff;color:#1a73e8;font-size:14px;cursor:pointer">＋ 新增超声评估</button>';
     html += '</div>';
