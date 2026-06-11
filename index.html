@@ -113,6 +113,14 @@ body{background:#f0f4f8;min-height:100vh;padding-bottom:80px}
 /* Risk factor checkboxes */
 .risk-row{margin-bottom:8px}
 .risk-row .risk-label{font-size:13px;font-weight:500;color:#333;margin-bottom:4px;display:block}
+.risk-row .radio-group{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.risk-row .radio-group label{min-width:auto;font-weight:400;font-size:13px;cursor:pointer;padding:4px 10px;background:#f5f7fa;border-radius:16px;border:1px solid #e0e4ea;line-height:1.4}
+.risk-row .radio-group input[type="radio"]{display:none}
+.risk-row .radio-group input[type="radio"]:checked+label{background:#e8f0fe;color:#1a73e8;border-color:#1a73e8;font-weight:500}
+.risk-row .check-group{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.risk-row .check-group label{min-width:auto;font-weight:400;font-size:13px;cursor:pointer;padding:4px 10px;background:#f5f7fa;border-radius:16px;border:1px solid #e0e4ea;line-height:1.4}
+.risk-row .check-group input[type="checkbox"]{display:none}
+.risk-row .check-group input[type="checkbox"]:checked+label{background:#e8f0fe;color:#1a73e8;border-color:#1a73e8;font-weight:500}
 </style>
 </head>
 <body>
@@ -562,7 +570,39 @@ function switchTab(tab) {
     showAddForm();
   } else {
     document.querySelector('.tab-btn:nth-child(3)').classList.add('active');
+    showAbout();
   }
+}
+
+// ── 关于 / 免责声明 ──
+function showAbout() {
+  var list = document.getElementById('patientList');
+  var empty = document.getElementById('emptyState');
+  empty.style.display = 'none';
+  list.innerHTML = `
+    <div style="background:#fff;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-top:16px">
+      <h2 style="font-size:18px;color:#1a73e8;margin-bottom:16px">📋 内瘘术前评估系统</h2>
+      <div style="font-size:14px;color:#555;line-height:1.8;margin-bottom:20px">
+        <p>版本：1.0.0</p>
+        <p>用途：用于血液透析患者内瘘术前血管评估及数据记录</p>
+        <p>数据存储：所有数据仅保存在本设备本地，不上传至任何服务器</p>
+      </div>
+      <div style="border-top:1px solid #e8f0fe;padding-top:16px">
+        <h3 style="font-size:15px;color:#333;margin-bottom:10px">⚠️ 免责声明</h3>
+        <div style="font-size:13px;color:#888;line-height:1.8">
+          <p>1. 本应用仅供临床辅助参考，不能替代专业医疗判断。</p>
+          <p>2. 开发者不对因使用本应用所产生的任何直接或间接后果承担责任。</p>
+          <p>3. 所有临床决策应由具有资质的执业医师根据患者具体情况作出。</p>
+          <p>4. 请妥善保管本设备及数据，患者信息属个人隐私，泄漏风险由使用者自行承担。</p>
+          <p style="margin-top:12px;color:#aaa;font-size:12px">使用即表示您已阅读并同意上述条款。</p>
+        </div>
+      </div>
+      <div style="margin-top:20px;text-align:center;font-size:12px;color:#bbb">
+        <p>© 2026 内瘘术前评估系统</p>
+      </div>
+    </div>
+  `;
+}
 }
 
 // ── Form Show/Hide ──
