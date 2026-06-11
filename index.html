@@ -998,7 +998,6 @@ function collectFormData() {
     name,
     initials,
     gender,
-    date,
     hospId,
     phone,
     ward,
@@ -1321,7 +1320,6 @@ function renderDetail(p) {
   html += '<div class="section-sub">📋 基本信息</div><div class="card" style="font-size:14px">';
   html += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">`;
   html += `<div><strong>性别：</strong>${p.gender || '-'}</div>`;
-  html += `<div><strong>就诊日期：</strong>${p.date || '-'}</div>`;
   html += `<div><strong>住院号：</strong>${p.hospId || '-'}</div>`;
   html += `<div><strong>手机号：</strong>${p.phone || '-'}</div>`;
   html += `<div><strong>病区/床号：</strong>${p.ward || '-'}</div>`;
