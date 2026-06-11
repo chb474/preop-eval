@@ -1091,19 +1091,74 @@ function exportData() {
       return;
     }
     var exportObj = { version: '1.0', exportedAt: new Date().toISOString(), patients: all };
-    var blob = new Blob([JSON.stringify(exportObj, null, 2)], { type: 'application/json' });
-    var a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = '术前评估数据_' + new Date().toISOString().slice(0,10) + '.json';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(a.href);
-    showToast('✅ 已导出 ' + all.length + ' 条记录，文件已保存在手机文件管理器 - 下载(Download)文件夹');
+    var jsonStr = JSON.stringify(exportObj, null, 2);
+    var fileName = '术前评估数据_' + new Date().toISOString().slice(0,10) + '.json';
+
+    // 先尝试Web Share API（最推荐，弹出分享菜单可存到文件管理器）
+    trySaveViaShare(jsonStr, fileName, all.length);
   });
 }
 
-function importData(e) {
+function trySaveViaShare(data, fileName, count) {
+  if (navigator.share && navigator.canShare) {
+    try {
+      var blob = new Blob([data], { type: 'application/json' });
+      var fileObj = new File([blob], fileName, { type: 'application/json' });
+      if (navigator.canShare({ files: [fileObj] })) {
+        navigator.share({ title: fileName, files: [fileObj] }).then(function() {
+          showToast('✅ 已导出 ' + count + ' 条记录');
+        }).catch(function() {
+          showExportModal(data, fileName, count);
+        });
+        return;
+      }
+    } catch(e) {}
+  }
+  showExportModal(data, fileName, count);
+}
+
+function showExportModal(data, fileName, count) {
+  var overlay = document.createElement('div');
+  overlay.className = 'modal-overlay top';
+  overlay.style.cssText = 'z-index:99999;display:flex;align-items:center;justify-content:center';
+  overlay.style.background = 'rgba(0,0,0,0.45)';
+  overlay.innerHTML = '<div style="background:#fff;border-radius:16px;padding:24px;width:85vw;max-width:380px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.15)">' +
+    '<div style="font-size:14px;color:#1a73e8;font-weight:600;margin-bottom:4px">✅ 已导出 ' + count + ' 条记录</div>' +
+    '<div style="font-size:12px;color:#888;margin-bottom:16px">文件名：' + fileName + '</div>' +
+    '<div style="display:flex;flex-direction:column;gap:8px">' +
+      '<button onclick="saveViaLink(\'' + data.replace(/'/g, "\'").replace(/\n/g, "\\n") + '\',\'' + fileName + '\');this.closest(\'.modal-overlay\').remove()" style="padding:12px;border:none;border-radius:10px;background:#1a73e8;color:#fff;font-size:15px;cursor:pointer">保存文件</button>' +
+      '<button id="copyBtnInExport" style="padding:12px;border:1.5px solid #dde1e6;border-radius:10px;background:#fff;color:#333;font-size:15px;cursor:pointer">复制数据到剪贴板</button>' +
+      '<button onclick="this.closest(\'.modal-overlay\').remove()" style="padding:8px;border:none;background:none;color:#999;font-size:13px;cursor:pointer">关闭</button>' +
+    '</div></div>';
+  document.body.appendChild(overlay);
+
+  document.getElementById('copyBtnInExport').onclick = function() {
+    var ta = document.createElement('textarea');
+    ta.value = data;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+      document.execCommand('copy');
+      showToast('✅ 数据已复制，请打开备忘录贴上保存');
+    } catch(e) {
+      showToast('请长按选中文本复制');
+    }
+    document.body.removeChild(ta);
+  };
+}
+
+function saveViaLink(data, fileName) {
+  var encoded = 'data:application/json;charset=utf-8,' + encodeURIComponent(data);
+  var a = document.createElement('a');
+  a.href = encoded;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  showToast('✅ 文件已保存，请在手机文件管理器中查看');
+}function importData(e) {
   var file = e.target.files[0];
   if (!file) return;
   var reader = new FileReader();
