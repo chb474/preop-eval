@@ -573,6 +573,14 @@ body{background:#f0f4f8;min-height:100vh;padding-bottom:80px}
       <button class="btn btn-primary" onclick="saveBasicInfo()" style="flex:1">保存</button>
     </div>
   </div>
+<!-- 图片放大查看弹窗 -->
+<div class="modal-overlay top hidden" id="photoLightbox" onclick="closePhotoLightbox(event)">
+  <div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;padding:20px">
+    <div style="position:relative;max-width:95vw;max-height:95vh">
+      <button class="modal-close" onclick="event.stopPropagation();closePhotoLightbox(event)" style="position:absolute;top:-14px;right:-14px;z-index:10;background:#fff;border:1px solid #ddd;border-radius:50%;width:32px;height:32px;font-size:18px;line-height:32px;text-align:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.15)">✕</button>
+      <img id="lightboxImg" src="" style="max-width:100%;max-height:95vh;border-radius:8px;box-shadow:0 4px 24px rgba(0,0,0,0.3);display:block">
+    </div>
+  </div>
 </div>
 
 <script>
@@ -967,10 +975,11 @@ function handlePhotoFiles(e) {
 }
 
 function addPhotoElement(dataUrl, idx) {
-  const area = document.getElementById('photoArea');
-  const div = document.createElement('div');
+  var area = document.getElementById('photoArea');
+  var div = document.createElement('div');
   div.className = 'photo-item';
-  div.innerHTML = `<img src="${dataUrl}" alt="照片"><button class="del-photo" onclick="deletePhoto(${idx})">×</button>`;
+  var safeUrl = dataUrl.replace(/'/g, '%27');
+  div.innerHTML = '<div style="position:relative"><img src="' + safeUrl + '" alt="照片" style="cursor:pointer" onclick="openPhotoLightbox(\\\'' + safeUrl + '\\\')"><button class="del-photo" onclick="deletePhoto(' + idx + ')">×</button></div>';
   area.appendChild(div);
 }
 
@@ -1197,6 +1206,14 @@ async function savePatient() {
 // 患者列表
 // ══════════════════════════════════════════
 let allPatients = [];
+
+function openPhotoLightbox(src) {
+  document.getElementById('lightboxImg').src = src;
+  document.getElementById('photoLightbox').classList.remove('hidden');
+}
+function closePhotoLightbox(e) {
+  document.getElementById('photoLightbox').classList.add('hidden');
+}
 
 async function renderList() {
   allPatients = await dbGetAll();
@@ -1431,6 +1448,15 @@ function renderUltrasoundHtml(exam, idx, isFirst, patientId) {
     h += '<span style="font-size:11px;color:#1a73e8;background:#e8f0fe;padding:2px 8px;border-radius:8px">最新评估</span>';
     h += '</div>';
     h += _renderUsTable(u);
+    if (exam.photos && exam.photos.length) {
+      h += '<div style="margin-top:8px"><div style="font-size:12px;color:#1a73e8;font-weight:500;margin-bottom:4px">Hr 照片</div><div class="photo-area" style="display:flex;flex-wrap:wrap;gap:6px">';
+      exam.photos.forEach(function(pp) {
+        var pu = typeof pp === 'string' ? pp : (pp.data || pp);
+        var ps = pu.replace(/'/g, '%27');
+        h += '<div style="width:80px;text-align:center"><img src="' + ps + '" style="width:80px;height:80px;object-fit:cover;border-radius:6px;border:1px solid #e8ecf0;cursor:pointer" onclick="openPhotoLightbox(\\\'' + ps + '\\\')"></div>';
+      });
+      h += '</div></div>';
+    }
     h += '<div style="margin-top:10px;text-align:right"><button onclick="openEditUs(' + patientId + ',' + idx + ')" style="border:1px solid #dde1e6;border-radius:6px;background:#fff;padding:5px 12px;font-size:12px;color:#1a73e8;cursor:pointer">\u270f️ 编辑</button></div>';
     h += '</div>';
     return h;
@@ -1446,7 +1472,16 @@ function renderUltrasoundHtml(exam, idx, isFirst, patientId) {
   h += '</div>';
   h += '<div id="' + hid + '" style="padding:12px;display:' + displayStyle + '">';
   h += _renderUsTable(u);
-  h += '<div style="margin-top:8px;text-align:right"><button onclick="openEditUs(' + patientId + ',' + idx + ')" style="border:1px solid #dde1e6;border-radius:6px;background:#fff;padding:5px 12px;font-size:12px;color:#1a73e8;cursor:pointer">\u270f️ 编辑</button></div>';
+    if (exam.photos && exam.photos.length) {
+      h += '<div style="margin-top:8px"><div style="font-size:12px;color:#1a73e8;font-weight:500;margin-bottom:4px">Hr 照片</div><div class="photo-area" style="display:flex;flex-wrap:wrap;gap:6px">';
+      exam.photos.forEach(function(pp) {
+        var pu = typeof pp === 'string' ? pp : (pp.data || pp);
+        var ps = pu.replace(/'/g, '%27');
+        h += '<div style="width:80px;text-align:center"><img src="' + ps + '" style="width:80px;height:80px;object-fit:cover;border-radius:6px;border:1px solid #e8ecf0;cursor:pointer" onclick="openPhotoLightbox(\\\'' + ps + '\\\')"></div>';
+      });
+      h += '</div></div>';
+    }
+    h += '<div style="margin-top:8px;text-align:right"><button onclick="openEditUs(' + patientId + ',' + idx + ')" style="border:1px solid #dde1e6;border-radius:6px;background:#fff;padding:5px 12px;font-size:12px;color:#1a73e8;cursor:pointer">\u270f️ 编辑</button></div>';
   h += '</div></div>';
   return h;
 
@@ -1717,7 +1752,8 @@ function closeUltrasoundForm() {
   if (p.photos && p.photos.length) {
     html += '<div class="section-sub">📷 照片</div><div class="card"><div class="photo-area">';
     p.photos.forEach(url => {
-      html += `<div class="photo-item"><img src="${url}" alt="photo"></div>`;
+      var safeUrl = url.replace(/'/g, '%27');
+      html += '<div class="photo-item"><div style="position:relative"><img src="' + safeUrl + '" alt="photo" style="cursor:pointer" onclick="openPhotoLightbox(\\\'' + safeUrl + '\\\')"></div></div>';
     });
     html += '</div></div>';
   }
