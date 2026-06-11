@@ -642,7 +642,6 @@ function customConfirm(msg) {
         </div>
       </div>`;
     document.body.appendChild(overlay);
-    document.getElementById('exportCloseBtn').onclick = function() { overlay.remove(); };
     document.getElementById('confirmNoBtn').onclick = function() {
       overlay.remove();
       resolve(false);
