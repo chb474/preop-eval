@@ -677,10 +677,18 @@ async function loadFormData(id) {
 }
 
 // ── Photo Handling ──
+// 使用 getUserMedia 直接拍照（在 WebView 打包 APP 中生效）
 function takePhoto() {
-  const input = document.getElementById('photoInput');
-  input.value = '';
-  input.click();
+  // 先检测 getUserMedia 是否可用
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    // 降级到传统 file input
+    const input = document.getElementById('photoInput');
+    input.value = '';
+    input.click();
+    return;
+  }
+  // 弹出拍照模态框
+  showCameraModal();
 }
 
 function pickFromAlbum() {
@@ -691,6 +699,83 @@ function pickFromAlbum() {
 
 document.getElementById('photoInput').addEventListener('change', handlePhotoFiles);
 document.getElementById('photoInputAlbum').addEventListener('change', handlePhotoFiles);
+
+// ── 相机拍照模态框 ──
+let cameraStream = null;
+
+function showCameraModal() {
+  // 创建模态框
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay top';
+  overlay.id = 'cameraModal';
+  overlay.style.cssText = 'z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.85)';
+  
+  overlay.innerHTML = `
+    <div style="background:#000;border-radius:12px;overflow:hidden;width:90vw;max-width:400px;position:relative">
+      <video id="cameraPreview" autoplay playsinline style="width:100%;display:block;max-height:70vh;object-fit:contain"></video>
+      <div style="display:flex;gap:12px;justify-content:center;padding:16px;background:#111">
+        <button onclick="capturePhoto()" style="width:64px;height:64px;border-radius:50%;border:4px solid #fff;background:transparent;cursor:pointer">
+          <div style="width:48px;height:48px;border-radius:50%;background:#fff;margin:4px auto"></div>
+        </button>
+      </div>
+      <button onclick="closeCameraModal()" style="position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;border:none;background:rgba(255,255,255,0.2);color:#fff;font-size:20px;cursor:pointer;line-height:36px;text-align:center">✕</button>
+      <div id="cameraError" style="display:none;padding:20px;text-align:center;color:#ff6b6b;background:#1a1a1a"></div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  
+  // 启动摄像头
+  navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } } })
+    .then(function(stream) {
+      cameraStream = stream;
+      document.getElementById('cameraPreview').srcObject = stream;
+    })
+    .catch(function(err) {
+      const errDiv = document.getElementById('cameraError');
+      errDiv.style.display = 'block';
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        errDiv.innerHTML = '⚠️ 相机权限被拒绝<br><small>请在手机设置中允许此APP使用相机，然后重试</small>';
+      } else if (err.name === 'NotFoundError') {
+        errDiv.innerHTML = '⚠️ 未检测到相机设备';
+      } else {
+        errDiv.innerHTML = '⚠️ 无法打开相机: ' + err.message;
+      }
+      // 降级到 file input
+      setTimeout(function() {
+        closeCameraModal();
+        const input = document.getElementById('photoInput');
+        input.value = '';
+        input.click();
+      }, 2000);
+    });
+}
+
+function capturePhoto() {
+  const video = document.getElementById('cameraPreview');
+  if (!video || !video.videoWidth) return;
+  
+  const canvas = document.createElement('canvas');
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(video, 0, 0);
+  
+  const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+  photos.push(dataUrl);
+  addPhotoElement(dataUrl, photos.length - 1);
+  
+  closeCameraModal();
+  showToast('📸 照片已添加', 'success');
+}
+
+function closeCameraModal() {
+  if (cameraStream) {
+    cameraStream.getTracks().forEach(function(track) { track.stop(); });
+    cameraStream = null;
+  }
+  var modal = document.getElementById('cameraModal');
+  if (modal) { modal.remove(); }
+}
 
 function handlePhotoFiles(e) {
   const files = e.target.files;
