@@ -454,7 +454,7 @@ body{background:#f0f4f8;min-height:100vh;padding-bottom:80px}
     </table>
     <div style="display:flex;gap:12px;margin-top:16px">
       <button class="btn btn-outline" onclick="closeUltrasoundForm()" style="flex:1">取消</button>
-      <button class="btn btn-primary" onclick="saveNewUltrasoundExam()" style="flex:1">保存超声评估</button>
+      <button class="btn btn-primary" id="usSaveBtn" onclick="saveNewUltrasoundExam()" style="flex:1">保存超声评估</button>
     </div>
   </div>
 </div>
@@ -1330,7 +1330,35 @@ async function viewPatient(id) {
   document.getElementById('detailModal').classList.remove('hidden');
 }
 
-function renderUltrasoundHtml(exam, idx, isFirst) {
+function renderUltrasoundHtml(exam, idx, isFirst, patientId) {
+  var u = exam.data || exam;
+  // 最新一条：完整显示+编辑按钮
+  if (isFirst) {
+    var h = '<div style="margin-top:12px;border:1px solid #e0e7ef;border-radius:10px;padding:12px;background:#fafcff">';
+    h += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">';
+    h += '<span style="font-size:14px;font-weight:600;color:#1a73e8">\U0001f4c5 ' + (exam.date || '未知日期') + '</span>';
+    h += '<span style="font-size:11px;color:#1a73e8;background:#e8f0fe;padding:2px 8px;border-radius:8px">最新评估</span>';
+    h += '</div>';
+    h += _renderUsTable(u);
+    h += '<div style="margin-top:10px;text-align:right"><button onclick="openEditUs(' + patientId + ',' + idx + ')" style="border:1px solid #dde1e6;border-radius:6px;background:#fff;padding:5px 12px;font-size:12px;color:#1a73e8;cursor:pointer">\u270f️ 编辑</button></div>';
+    h += '</div>';
+    return h;
+  }
+  // 历史记录：折叠显示+编辑
+  var hid = 'us_' + (idx || '0');
+  var displayStyle = _expandedUsId === hid ? 'block' : 'none';
+  var arrowStyle = _expandedUsId === hid ? '▼' : '▶';
+  var h = '<div style="margin-top:6px;border:1px solid #e8ecf0;border-radius:8px;overflow:hidden">';
+  h += '<div onclick=_toggleUs("' + hid + '") style="padding:10px 12px;background:#f5f7fa;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none">';
+  h += '<span style="font-size:13px;color:#333;font-weight:500">' + arrowStyle + ' \U0001f4c5 ' + (exam.date || '未知日期') + '</span>';
+  h += '<span style="font-size:11px;color:#1a73e8;cursor:pointer" onclick="event.stopPropagation();openEditUs(' + patientId + ',' + idx + ')">\u270f️ 编辑</span>';
+  h += '</div>';
+  h += '<div id="' + hid + '" style="padding:12px;display:' + displayStyle + '">';
+  h += _renderUsTable(u);
+  h += '<div style="margin-top:8px;text-align:right"><button onclick="openEditUs(' + patientId + ',' + idx + ')" style="border:1px solid #dde1e6;border-radius:6px;background:#fff;padding:5px 12px;font-size:12px;color:#1a73e8;cursor:pointer">\u270f️ 编辑</button></div>';
+  h += '</div></div>';
+  return h;
+
   var u = exam.data || exam;
   // 最新一条：完整显示
   if (isFirst) {
@@ -1396,11 +1424,12 @@ function _renderUsTable(u) {
 }
 
 function addUltrasoundExam(patientId) {
+  window._usEditIdx = undefined;
+  document.getElementById('usSaveBtn').textContent = '保存超声评估';
+  
   dbGet(patientId).then(function(p) {
     if (!p) { showToast('❌ 未找到患者'); return; }
-    // Save the patient id for later use
     window._usPatientId = patientId;
-    window._usPatientName = p.name || '';
     document.getElementById('us_date').value = new Date().toISOString().slice(0,10);
     document.querySelectorAll('#ultrasoundFormModal .u').forEach(function(i) { i.value = ''; });
     document.getElementById('ultrasoundFormModal').classList.remove('hidden');
@@ -1430,20 +1459,54 @@ function saveNewUltrasoundExam() {
         p.ultrasoundExams = [];
       }
     }
-    delete p.ultrasound; // 清除旧格式
-    p.ultrasoundExams.push({date: date, data: data});
+    delete p.ultrasound;
+    
+    var editIdx = window._usEditIdx;
+    if (editIdx !== undefined && editIdx >= 0 && editIdx < p.ultrasoundExams.length) {
+      // 编辑模式：更新指定索引的记录
+      p.ultrasoundExams[editIdx].date = date;
+      p.ultrasoundExams[editIdx].data = data;
+      window._usEditIdx = undefined;
+      showToast('✅ 超声评估已更新');
+    } else {
+      // 新增模式：追加新记录
+      p.ultrasoundExams.push({date: date, data: data});
+      showToast('✅ 超声评估已保存');
+    }
+    
     p.updatedAt = Date.now();
     dbUpdate(p).then(function() {
-      showToast('✅ 超声评估已保存');
+      document.getElementById('usSaveBtn').textContent = '保存超声评估';
       document.getElementById('ultrasoundFormModal').classList.add('hidden');
-      // Refresh detail view
       renderDetail(p);
     });
   });
 }
 
+f
+function openEditUs(patientId, examIdx) {
+  dbGet(patientId).then(function(p) {
+    if (!p) { showToast('❌ 未找到患者'); return; }
+    var exams = p.ultrasoundExams || [];
+    if (!Array.isArray(exams) && p.ultrasound && typeof p.ultrasound === 'object') {
+      exams = [{date: p.date || '', data: p.ultrasound}];
+    }
+    var exam = exams[examIdx];
+    if (!exam) { showToast('❌ 未找到该次评估记录'); return; }
+    window._usPatientId = patientId;
+    window._usEditIdx = examIdx;
+    document.getElementById('us_date').value = exam.date || '';
+    document.querySelectorAll('#ultrasoundFormModal .u').forEach(function(i) {
+      i.value = (exam.data || {})[i.dataset.key] || '';
+    });
+    document.getElementById('usSaveBtn').textContent = '保存修改';
+    document.getElementById('ultrasoundFormModal').classList.remove('hidden');
+  });
+}
 function closeUltrasoundForm() {
   document.getElementById('ultrasoundFormModal').classList.add('hidden');
+  document.getElementById('usSaveBtn').textContent = '保存超声评估';
+  window._usEditIdx = undefined;
 }function renderDetail(p) {
   const el = document.getElementById('detailContent');
   let html = `<div style="margin-bottom:16px"><h2 style="font-size:20px;color:#1a73e8">${escapeHtml(p.name)}</h2><span style="color:#8e99a8;font-size:13px">首字母: ${p.initials || ''}</span></div>`;
@@ -1479,7 +1542,7 @@ function closeUltrasoundForm() {
     html += '<div class="section-sub">🩸 血管超声评估 <span style="font-size:12px;color:#8e99a8;font-weight:400">共' + ultrasoundExams.length + '次</span></div>';
     html += '<div class="card">';
     for (var ei = 0; ei < ultrasoundExams.length; ei++) {
-      html += renderUltrasoundHtml(ultrasoundExams[ei], ei, ei === 0);
+      html += renderUltrasoundHtml(ultrasoundExams[ei], ei, ei === 0, p.id);
     }
     html += '<button onclick="addUltrasoundExam(' + p.id + ')" style="width:100%;margin-top:10px;padding:10px;border:1.5px dashed #1a73e8;border-radius:10px;background:#f0f6ff;color:#1a73e8;font-size:14px;cursor:pointer">＋ 新增超声评估</button>';
     html += '</div>';
