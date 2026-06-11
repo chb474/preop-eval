@@ -236,6 +236,8 @@ body{background:#f0f4f8;min-height:100vh;padding-bottom:80px}
         <tr><td>贵要静脉距皮深度 (mm)</td><td><input type="text" class="u" data-key="bvd_l"></td><td><input type="text" class="u" data-key="bvd_r"></td></tr>
         <tr><td>静脉分支情况</td><td><input type="text" class="u" data-key="branch_l"></td><td><input type="text" class="u" data-key="branch_r"></td></tr>
         <tr><td>血管走行变异</td><td><input type="text" class="u" data-key="var_l"></td><td><input type="text" class="u" data-key="var_r"></td></tr>
+        <tr><td>肘正中静脉内径 (mm)</td><td><input type="text" class="u" data-key="mv_l"></td><td><input type="text" class="u" data-key="mv_r"></td></tr>
+        <tr><td>肘穿静脉内径 (mm)</td><td><input type="text" class="u" data-key="pv_l"></td><td><input type="text" class="u" data-key="pv_r"></td></tr>
         <tr><td>备注</td><td><input type="text" class="u" data-key="note_l"></td><td><input type="text" class="u" data-key="note_r"></td></tr>
       </table>
     </div>
@@ -296,7 +298,7 @@ body{background:#f0f4f8;min-height:100vh;padding-bottom:80px}
           <input type="radio" name="risk_dm" id="risk_dm_y" value="有"><label for="risk_dm_y">有</label>
           <input type="radio" name="risk_dm" id="risk_dm_n" value="无" checked><label for="risk_dm_n">无</label>
         </div>
-        <span style="font-size:13px;color:#666;margin-left:8px">病程：<input type="text" id="risk_dm_dur" style="width:48px;padding:4px 6px;border:1px solid #dde1e6;border-radius:6px;font-size:13px"> 年</span>
+        <span style="font-size:14px;color:#555;margin-left:8px">病程：<input type="text" id="risk_dm_dur" style="width:48px;padding:4px 6px;border:1px solid #dde1e6;border-radius:6px;font-size:14px"> 年</span>
       </div>
       <div class="risk-row">
         <span class="risk-label">高血压史</span>
@@ -304,7 +306,7 @@ body{background:#f0f4f8;min-height:100vh;padding-bottom:80px}
           <input type="radio" name="risk_htn" id="risk_htn_y" value="有"><label for="risk_htn_y">有</label>
           <input type="radio" name="risk_htn" id="risk_htn_n" value="无" checked><label for="risk_htn_n">无</label>
         </div>
-        <span style="font-size:13px;color:#666;margin-left:8px">病程：<input type="text" id="risk_htn_dur" style="width:48px;padding:4px 6px;border:1px solid #dde1e6;border-radius:6px;font-size:13px"> 年</span>
+        <span style="font-size:14px;color:#555;margin-left:8px">病程：<input type="text" id="risk_htn_dur" style="width:48px;padding:4px 6px;border:1px solid #dde1e6;border-radius:6px;font-size:14px"> 年</span>
       </div>
       <div class="risk-row">
         <span class="risk-label">冠心病</span>
@@ -326,7 +328,7 @@ body{background:#f0f4f8;min-height:100vh;padding-bottom:80px}
           <input type="radio" name="risk_smk" id="risk_smk_y" value="有"><label for="risk_smk_y">有</label>
           <input type="radio" name="risk_smk" id="risk_smk_n" value="无" checked><label for="risk_smk_n">无</label>
         </div>
-        <span style="font-size:13px;color:#666;margin-left:8px"><input type="text" id="risk_smk_qty" style="width:48px;padding:4px 6px;border:1px solid #dde1e6;border-radius:6px;font-size:13px"> 支/日</span>
+        <span style="font-size:14px;color:#555;margin-left:8px"><input type="text" id="risk_smk_qty" style="width:48px;padding:4px 6px;border:1px solid #dde1e6;border-radius:6px;font-size:14px"> 支/日</span>
       </div>
       <div class="risk-row">
         <span class="risk-label">抗血小板/抗凝药</span>
@@ -1010,7 +1012,7 @@ function renderDetail(p) {
     // 静脉组
     html += '<div style="font-size:13px;color:#1a73e8;font-weight:500;margin:10px 0 4px">静脉</div>';
     html += '<table class="sub-table"><tr><th>项目</th><th>左侧</th><th>右侧</th></tr>';
-    const veinItems = [['前臂头静脉内径','cv_forearm_l','cv_forearm_r'],['上臂头静脉内径','cv_upper_l','cv_upper_r'],['头静脉通畅性','cvp_l','cvp_r'],['头静脉距皮深度','cvd_l','cvd_r'],['前臂贵要静脉内径','bv_forearm_l','bv_forearm_r'],['上臂贵要静脉内径','bv_upper_l','bv_upper_r'],['贵要静脉通畅性','bvp_l','bvp_r'],['贵要静脉距皮深度','bvd_l','bvd_r'],['静脉分支','branch_l','branch_r'],['血管走行变异','var_l','var_r'],['备注','note_l','note_r']];
+    const veinItems = [['前臂头静脉内径','cv_forearm_l','cv_forearm_r'],['上臂头静脉内径','cv_upper_l','cv_upper_r'],['头静脉通畅性','cvp_l','cvp_r'],['头静脉距皮深度','cvd_l','cvd_r'],['前臂贵要静脉内径','bv_forearm_l','bv_forearm_r'],['上臂贵要静脉内径','bv_upper_l','bv_upper_r'],['贵要静脉通畅性','bvp_l','bvp_r'],['贵要静脉距皮深度','bvd_l','bvd_r'],['静脉分支','branch_l','branch_r'],['血管走行变异','var_l','var_r'],['肘正中静脉内径','mv_l','mv_r'],['肘穿静脉内径','pv_l','pv_r'],['备注','note_l','note_r']];
     for (const [label, kL, kR] of veinItems) {
       const vl = u[kL] || '-', vr = u[kR] || '-';
       if (vl == '-' && vr == '-') continue;
