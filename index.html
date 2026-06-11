@@ -1078,7 +1078,8 @@ function doSearch() {
 
 // ── Delete ──
 async function deletePatient(id) {
-  if (!confirm('确认删除该患者记录？')) return;
+  var result = await customConfirm('确认删除该患者记录？');
+  if (!result) return;
   await dbDelete(id);
   showToast('已删除');
   renderList();
@@ -1210,11 +1211,13 @@ function editCurrentPatient() {
 
 function deleteCurrentPatient() {
   if (detailPatientId === null) return;
-  if (!confirm('确认删除该患者记录？')) return;
-  dbDelete(detailPatientId).then(() => {
-    showToast('已删除');
-    document.getElementById('detailModal').classList.add('hidden');
-    renderList();
+  customConfirm('确认删除该患者记录？').then(function(ok) {
+    if (!ok) return;
+    dbDelete(detailPatientId).then(function() {
+      showToast('已删除');
+      document.getElementById('detailModal').classList.add('hidden');
+      renderList();
+    });
   });
 }
 
