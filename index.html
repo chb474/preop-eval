@@ -471,6 +471,56 @@ body{background:#f0f4f8;min-height:100vh;padding-bottom:80px}
     </div>
 </div>
 
+<!-- 基本信息编辑弹窗 -->
+<div class="modal-overlay top hidden" id="basicInfoModal">
+  <div class="modal-content" style="max-height:92vh">
+    <button class="modal-close" onclick="closeBasicInfo()">✕</button>
+    <h2 style="font-size:18px;color:#1a73e8;margin-bottom:16px">编辑基本信息</h2>
+    <div class="form-row">
+      <label>姓名</label>
+      <input type="text" id="bi_name" readonly style="background:#f0f2f5;color:#888">
+    </div>
+    <div class="form-row">
+      <label>性别</label>
+      <div class="radio-group">
+        <input type="radio" name="bi_gender" value="男" id="bi_gender_m"><label for="bi_gender_m">男</label>
+        <input type="radio" name="bi_gender" value="女" id="bi_gender_f"><label for="bi_gender_f">女</label>
+      </div>
+    </div>
+    <div class="form-row">
+      <label>首次就诊</label>
+      <input type="date" id="bi_date">
+    </div>
+    <div class="form-row">
+      <label>住院号</label>
+      <input type="text" id="bi_hospId" readonly style="background:#f0f2f5;color:#888">
+    </div>
+    <div class="form-row">
+      <label>手机号</label>
+      <input type="text" id="bi_phone">
+    </div>
+    <div class="form-row">
+      <label>病区/床号</label>
+      <input type="text" id="bi_ward">
+    </div>
+    <div class="form-row">
+      <label>原发病</label>
+      <div class="check-group">
+        <input type="checkbox" id="bi_disease_ckd" value="CKD"><label for="bi_disease_ckd">CKD</label>
+        <input type="checkbox" id="bi_disease_dm" value="DM"><label for="bi_disease_dm">DM</label>
+        <input type="checkbox" id="bi_disease_htn" value="HTN"><label for="bi_disease_htn">HTN</label>
+        <input type="checkbox" id="bi_disease_gn" value="GN"><label for="bi_disease_gn">GN</label>
+        <input type="checkbox" id="bi_disease_sle" value="SLE"><label for="bi_disease_sle">SLE</label>
+        <input type="checkbox" id="bi_disease_other" value="其他"><label for="bi_disease_other">其他</label>
+      </div>
+    </div>
+    <div style="display:flex;gap:12px;margin-top:20px">
+      <button class="btn btn-outline" onclick="closeBasicInfo()" style="flex:1">取消</button>
+      <button class="btn btn-primary" onclick="saveBasicInfo()" style="flex:1">保存</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ══════════════════════════════════════════
 // 数据库操作（IndexedDB）
@@ -1525,7 +1575,7 @@ function closeUltrasoundForm() {
   let html = `<div style="margin-bottom:16px"><h2 style="font-size:20px;color:#1a73e8">${escapeHtml(p.name)}</h2><span style="color:#8e99a8;font-size:13px">首字母: ${p.initials || ''}</span></div>`;
 
   // 基本信息
-  html += '<div class="section-sub">📋 基本信息</div><div class="card" style="font-size:14px">';
+  html += '<div class="section-sub" style="display:flex;justify-content:space-between;align-items:center">📋 基本信息<span onclick="showBasicInfo(' + p.id + ')" style="font-size:12px;color:#1a73e8;font-weight:400;cursor:pointer;padding:4px 10px;border:1px solid #dde1e6;border-radius:6px">✏️ 编辑</span></div><div class="card" style="font-size:14px">';
   html += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">`;
   html += `<div><strong>性别：</strong>${p.gender || '-'}</div>`;
   html += `<div><strong>首次就诊日期：</strong>${p.date || '-'}</div>`;
@@ -1633,6 +1683,60 @@ function editCurrentPatient() {
   document.getElementById('detailModal').classList.add('hidden');
   showEditForm(detailPatientId);
 }
+
+
+// ── 基本信息编辑 ──
+var biPatientId = null;
+
+function showBasicInfo(id) {
+  biPatientId = id;
+  dbGet(id).then(function(p) {
+    if (!p) return;
+    document.getElementById('bi_name').value = p.name || '';
+    document.querySelectorAll('input[name="bi_gender"]').forEach(function(r) {
+      r.checked = r.value === (p.gender || '男');
+    });
+    document.getElementById('bi_date').value = p.date || '';
+    document.getElementById('bi_hospId').value = p.hospId || '';
+    document.getElementById('bi_phone').value = p.phone || '';
+    document.getElementById('bi_ward').value = p.ward || '';
+    document.querySelectorAll('#basicInfoModal .check-group input[type="checkbox"]').forEach(function(c) {
+      c.checked = (p.diseases || []).includes(c.value);
+    });
+    document.getElementById('basicInfoModal').classList.remove('hidden');
+    var mc = document.querySelector('#basicInfoModal .modal-content');
+    if (mc) mc.scrollTop = 0;
+  });
+}
+
+function saveBasicInfo() {
+  var id = biPatientId;
+  if (!id) { showToast('❌ 数据丢失'); return; }
+  
+  dbGet(id).then(function(p) {
+    if (!p) return;
+    p.gender = document.querySelector('input[name="bi_gender"]:checked').value;
+    p.date = document.getElementById('bi_date').value;
+    p.phone = document.getElementById('bi_phone').value.trim();
+    p.ward = document.getElementById('bi_ward').value.trim();
+    p.diseases = [];
+    document.querySelectorAll('#basicInfoModal .check-group input[type="checkbox"]:checked').forEach(function(c) {
+      p.diseases.push(c.value);
+    });
+    p.updatedAt = Date.now();
+    dbUpdate(p).then(function() {
+      showToast('✅ 基本信息已更新');
+      closeBasicInfo();
+      renderDetail(p);
+    });
+  });
+}
+
+function closeBasicInfo() {
+  document.getElementById('basicInfoModal').classList.add('hidden');
+  biPatientId = null;
+}
+
 
 function deleteCurrentPatient() {
   if (detailPatientId === null) return;
