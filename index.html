@@ -621,8 +621,51 @@ function showEditForm(id) {
 }
 
 function hideForm() {
+  // 如果有输入数据，二次确认
+  if (hasFormData()) {
+    if (!confirm('当前有未保存的数据，确定退出吗？')) return;
+  }
   document.getElementById('formModal').classList.add('hidden');
   renderList();
+}
+
+function hasFormData() {
+  // 检查表单是否有输入内容
+  const textInputs = ['f_name','f_hospId','f_phone','f_ward','f_conclusion','f_remark','risk_dm_dur','risk_htn_dur','risk_smk_qty'];
+  for (const id of textInputs) {
+    const el = document.getElementById(id);
+    if (el && el.value.trim()) return true;
+  }
+  // 检查超声表格输入
+  let hasUltrasound = false;
+  document.querySelectorAll('.u').forEach(function(i) {
+    if (i.value.trim()) hasUltrasound = true;
+  });
+  if (hasUltrasound) return true;
+  // 检查实验室输入
+  let hasLab = false;
+  document.querySelectorAll('.lab').forEach(function(i) {
+    if (i.value.trim()) hasLab = true;
+  });
+  if (hasLab) return true;
+  // 检查照片
+  if (photos.length > 0) return true;
+  // 检查是否有选中的radio/checkbox（排除默认的'无'）
+  let hasRisk = false;
+  document.querySelectorAll('.risk-row input[type="radio"]:checked').forEach(function(r) {
+    if (r.value !== '无') hasRisk = true;
+  });
+  if (hasRisk) return true;
+  let hasCheck = false;
+  document.querySelectorAll('.risk-row input[type="checkbox"]:checked').forEach(function() {
+    hasCheck = true;
+  });
+  if (hasCheck) return true;
+  document.querySelectorAll('#formModal input[type="checkbox"][id^="op_"]:checked').forEach(function() {
+    hasCheck = true;
+  });
+  if (hasCheck) return true;
+  return false;
 }
 
 function hideDetail() {
