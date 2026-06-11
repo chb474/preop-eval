@@ -620,10 +620,43 @@ function showEditForm(id) {
   document.getElementById('formModal').classList.remove('hidden');
 }
 
+// ── 自定义确认弹窗（替代原生 confirm，不显示网址）──
+function customConfirm(msg) {
+  return new Promise(function(resolve) {
+    var overlay = document.createElement('div');
+    overlay.className = 'modal-overlay top';
+    overlay.style.cssText = 'z-index:99999;display:flex;align-items:center;justify-content:center';
+    overlay.style.background = 'rgba(0,0,0,0.45)';
+    overlay.innerHTML = `<div style="background:#fff;border-radius:16px;padding:28px 24px 20px;width:300px;max-width:85vw;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.15)">
+        <div style="font-size:16px;color:#333;line-height:1.6;margin-bottom:24px;white-space:pre-line">${msg}</div>
+        <div style="display:flex;gap:12px">
+          <button id="confirmNoBtn" style="flex:1;padding:10px;border:1.5px solid #dde1e6;border-radius:10px;background:#fff;color:#666;font-size:15px;cursor:pointer">取消</button>
+          <button id="confirmYesBtn" style="flex:1;padding:10px;border:none;border-radius:10px;background:#1a73e8;color:#fff;font-size:15px;cursor:pointer">确定</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    document.getElementById('confirmNoBtn').onclick = function() {
+      overlay.remove();
+      resolve(false);
+    };
+    document.getElementById('confirmYesBtn').onclick = function() {
+      overlay.remove();
+      resolve(true);
+    };
+  });
+}
+
+// ── Form Show/Hide ──
 function hideForm(force) {
   // 只在取消时做二次确认，保存（force=true）跳过
   if (!force && hasFormData()) {
-    if (!confirm('确定退出？未保存的数据将丢失。')) return;
+    customConfirm('确定退出？\n未保存的数据将丢失。').then(function(ok) {
+      if (ok) {
+        document.getElementById('formModal').classList.add('hidden');
+        renderList();
+      }
+    });
+    return;
   }
   document.getElementById('formModal').classList.add('hidden');
   renderList();
