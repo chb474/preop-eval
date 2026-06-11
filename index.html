@@ -1449,9 +1449,19 @@ function deleteCurrentPatient() {
 // Initialize
 // ══════════════════════════════════════════
 // 诊诊日期已迁移至每次超声评估
-// Register Service Worker
+// Register Service Worker - force update old cache
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js');
+  // 先注销所有旧的 Service Worker
+  navigator.serviceWorker.getRegistrations().then(function(regs) {
+    for (var i = 0; i < regs.length; i++) {
+      regs[i].unregister();
+    }
+  }).then(function() {
+    // 重新注册新的 Service Worker
+    navigator.serviceWorker.register('sw.js?v=2').then(function(reg) {
+      reg.update();
+    });
+  });
 }
 
 renderList();
