@@ -1141,34 +1141,58 @@ function quickReassess() {
 function exportData() {
   dbGetAll().then(function(all) {
     if (all.length === 0) {
-      customConfirm('暂无患者数据可导出');
+      customConfirm('\u6682\u65E0\u60A3\u8005\u6570\u636E\u53EF\u5BFC\u51FA');
       return;
     }
-    var exportObj = { version: '1.0', exportedAt: new Date().toISOString(), patients: all };
-    var jsonStr = JSON.stringify(exportObj, null, 2);
+    var obj = { version: '1.0', exportedAt: new Date().toISOString(), patients: all };
+    var jsonStr = JSON.stringify(obj, null, 2);
     var today = new Date().toISOString().slice(0,10);
+    var fname = '\u672F\u524D\u8BC4\u4F30\u6570\u636E_' + today + '.json';
 
     var overlay = document.createElement('div');
     overlay.className = 'modal-overlay top';
     overlay.style.cssText = 'z-index:99999;display:flex;align-items:center;justify-content:center';
     overlay.style.background = 'rgba(0,0,0,0.45)';
     overlay.innerHTML =
-      '<div style="background:#fff;border-radius:16px;padding:16px;width:92vw;max-width:420px;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,0.15)">' +
-      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">' +
-      '<div><span style="font-size:14px;font-weight:600;color:#1a73e8">✅ 已导出 ' + all.length + ' 条记录</span><br><span style="font-size:11px;color:#999">文件名：术前评估数据_' + today + '.json</span></div>' +
-      '<button onclick="this.parentElement.parentElement.parentElement.remove()" style="width:28px;height:28px;border:none;background:#f0f0f0;border-radius:50%;font-size:16px;cursor:pointer;color:#666;line-height:28px;text-align:center">✕</button>' +
-      '</div>' +
-      '<div style="font-size:12px;color:#e67e22;background:#fff8e6;padding:8px;border-radius:8px;margin-bottom:8px">������ 请长按下方文本区域，选择“全选”→“复制”，然后打开备忘录或文件管理器贴上保存</div>' +
-      '<textarea id="exportFullData" readonly style="flex:1;min-height:200px;border:1px solid #dde1e6;border-radius:8px;padding:10px;font-size:11px;font-family:monospace;resize:none;background:#f8f9fa;color:#333;line-height:1.5;user-select:text;-webkit-user-select:text">' + jsonStr + '</textarea>' +
-      '<div style="margin-top:8px;text-align:center;font-size:11px;color:#bbb">数据仅保存在本地，请及时备份</div>' +
-      '</div>';
+      '<div style="background:#fff;border-radius:16px;padding:24px;width:85vw;max-width:340px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.15)">' +
+      '<div style="font-size:16px;font-weight:600;color:#1a73e8;margin-bottom:4px">' + String.fromCharCode(9989) + ' \u5DF2\u5BFC\u51FA ' + all.length + ' \u6761\u8BB0\u5F55</div>' +
+      '<div style="font-size:12px;color:#999;margin-bottom:18px">' + fname + '</div>' +
+      '<div style="display:flex;flex-direction:column;gap:10px">' +
+      '<button id="dlBtn" style="width:100%;padding:14px;border:none;border-radius:10px;background:#1a73e8;color:#fff;font-size:16px;cursor:pointer">' + String.fromCharCode(128229) + ' \u4FDD\u5B58\u6587\u4EF6</button>' +
+      '<button id="cpBtn" style="width:100%;padding:14px;border:1.5px solid #dde1e6;border-radius:10px;background:#fff;color:#333;font-size:16px;cursor:pointer">' + String.fromCharCode(128203) + ' \u590D\u5236\u5230\u526A\u8D34\u677F</button>' +
+      '<button onclick="this.closest('.modal-overlay').remove()" style="width:100%;padding:8px;border:none;background:none;color:#999;font-size:14px;cursor:pointer">\u5173\u95ED</button>' +
+      '</div></div>';
     document.body.appendChild(overlay);
-    setTimeout(function() {
-      var ta = document.getElementById('exportFullData');
-      if (ta) { ta.focus(); ta.select(); }
-    }, 300);
+
+    document.getElementById('dlBtn').onclick = function() {
+      var a = document.createElement('a');
+      a.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(jsonStr);
+      a.download = fname;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      overlay.remove();
+      showToast('\u5DF2\u4FDD\u5B58\uFF0C\u8BF7\u5728\u624B\u673A\u6587\u4EF6\u7BA1\u7406\u5668\u4E2D\u67E5\u770B');
+    };
+
+    document.getElementById('cpBtn').onclick = function() {
+      var ta = document.createElement('textarea');
+      ta.value = jsonStr;
+      ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+        showToast('\u5DF2\u590D\u5236\uFF0C\u8BF7\u6253\u5F00\u5907\u5FD8\u5F55\u7C98\u8D34\u4FDD\u5B58');
+      } catch(e) {
+        showToast('\u8BF7\u957F\u6309\u9009\u62E9\u6587\u672C\u590D\u5236');
+      }
+      document.body.removeChild(ta);
+      overlay.remove();
+    };
   });
 }
+
 function importData(e) {
   var file = e.target.files[0];
   if (!file) return;
