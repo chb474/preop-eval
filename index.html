@@ -583,6 +583,16 @@ body{background:#f0f4f8;min-height:100vh;padding-bottom:80px}
   </div>
 </div>
 
+<!-- 图片放大查看弹窗 -->
+<div class="modal-overlay top hidden" id="photoLightbox" onclick="closePhotoLightbox()">
+  <div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;padding:20px">
+    <div style="position:relative;max-width:95vw;max-height:95vh">
+      <button class="modal-close" onclick="event.stopPropagation();closePhotoLightbox()" style="position:absolute;top:-14px;right:-14px;z-index:10;background:#fff;border:1px solid #ddd;border-radius:50%;width:32px;height:32px;font-size:18px;line-height:32px;text-align:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.15)">✕</button>
+      <img id="lightboxImg" src="" style="max-width:100%;max-height:95vh;border-radius:8px;box-shadow:0 4px 24px rgba(0,0,0,0.3);display:block">
+    </div>
+  </div>
+</div>
+
 <script>
 // ══════════════════════════════════════════
 // 数据库操作（IndexedDB）
@@ -982,7 +992,7 @@ function addPhotoElement(dataUrl, idx) {
   var div = document.createElement('div');
   div.className = 'photo-item';
   var safeUrl = dataUrl.replace(/'/g, '%27');
-  div.innerHTML = '<div style="position:relative"><img src="' + safeUrl + '" alt="照片" style="cursor:pointer" onclick="openPhotoLightbox(\\\'' + safeUrl + '\\\')"><button class="del-photo" onclick="deletePhoto(' + idx + ')">×</button></div>';
+  div.innerHTML = '<div style="position:relative"><img src="' + safeUrl + '" alt="照片" class="photo-clickable"><button class="del-photo" onclick="deletePhoto(' + idx + ')">×</button></div>';
   area.appendChild(div);
 }
 
@@ -1456,7 +1466,7 @@ function renderUltrasoundHtml(exam, idx, isFirst, patientId) {
       exam.photos.forEach(function(pp) {
         var pu = typeof pp === 'string' ? pp : (pp.data || pp);
         var ps = pu.replace(/'/g, '%27');
-        h += '<div style="width:80px;text-align:center"><img src="' + ps + '" style="width:80px;height:80px;object-fit:cover;border-radius:6px;border:1px solid #e8ecf0;cursor:pointer" onclick="openPhotoLightbox(\\\'' + ps + '\\\')"></div>';
+        h += '<div style="width:80px;text-align:center"><img src="' + ps + '" class="photo-clickable"></div>';
       });
       h += '</div></div>';
     }
@@ -1480,7 +1490,7 @@ function renderUltrasoundHtml(exam, idx, isFirst, patientId) {
       exam.photos.forEach(function(pp) {
         var pu = typeof pp === 'string' ? pp : (pp.data || pp);
         var ps = pu.replace(/'/g, '%27');
-        h += '<div style="width:80px;text-align:center"><img src="' + ps + '" style="width:80px;height:80px;object-fit:cover;border-radius:6px;border:1px solid #e8ecf0;cursor:pointer" onclick="openPhotoLightbox(\\\'' + ps + '\\\')"></div>';
+        h += '<div style="width:80px;text-align:center"><img src="' + ps + '" class="photo-clickable"></div>';
       });
       h += '</div></div>';
     }
@@ -1756,7 +1766,7 @@ function closeUltrasoundForm() {
     html += '<div class="section-sub">📷 照片</div><div class="card"><div class="photo-area">';
     p.photos.forEach(url => {
       var safeUrl = url.replace(/'/g, '%27');
-      html += '<div class="photo-item"><div style="position:relative"><img src="' + safeUrl + '" alt="photo" style="cursor:pointer" onclick="openPhotoLightbox(\\\'' + safeUrl + '\\\')"></div></div>';
+      html += '<div class="photo-item"><div style="position:relative"><img src="' + safeUrl + '" alt="photo" class="photo-clickable"></div></div>';
     });
     html += '</div></div>';
   }
@@ -1858,6 +1868,20 @@ function deleteCurrentPatient() {
 // ══════════════════════════════════════════
 // Initialize
 // ══════════════════════════════════════════
+function openPhotoLightbox(src) {
+  document.getElementById('lightboxImg').src = src;
+  document.getElementById('photoLightbox').classList.remove('hidden');
+}
+function closePhotoLightbox() {
+  document.getElementById('photoLightbox').classList.add('hidden');
+}
+
+document.addEventListener('click', function(e) {
+  if (e.target.classList.contains('photo-clickable')) {
+    openPhotoLightbox(e.target.src);
+  }
+});
+
 // Set today's date as default for both date fields
 document.getElementById('f_date').value = new Date().toISOString().split('T')[0];
 document.getElementById('us_date').value = new Date().toISOString().split('T')[0];
