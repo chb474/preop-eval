@@ -380,10 +380,13 @@ body{background:#f0f4f8;min-height:100vh;padding-bottom:80px}
     <div class="section-sub">📷 照片</div>
     <div class="card">
       <div class="photo-area" id="photoArea"></div>
-      <!-- 一个 input 就够了，Android 文件选择器会自动弹出「拍照」和「相册」选项 -->
-      <input type="file" id="photoInput" accept="image/*" style="display:none" multiple>
+      <!-- 拍照：专门调用 capture，定向启动相机 -->
+      <input type="file" id="photoInputCamera" accept="image/*" capture="environment" style="display:none">
+      <!-- 相册：不带 capture，弹出文件选择器 -->
+      <input type="file" id="photoInputAlbum" accept="image/*" style="display:none" multiple>
       <div class="btn-row">
-        <button class="btn btn-outline btn-sm" onclick="pickImage()">📸 拍照 / 选择照片</button>
+        <button class="btn btn-outline btn-sm" onclick="takePhoto()">📸 拍照</button>
+        <button class="btn btn-outline btn-sm" onclick="pickFromAlbum()">🖼️ 从相册选择</button>
       </div>
     </div>
 
@@ -676,14 +679,22 @@ async function loadFormData(id) {
 }
 
 // ── Photo Handling ──
-// 使用单个文件选择器：Android 原生会弹出「拍照」和「相册」两种选项
-function pickImage() {
-  const input = document.getElementById('photoInput');
+// 拍照：capture="environment" 定向调用后置摄像头拍照
+function takePhoto() {
+  const input = document.getElementById('photoInputCamera');
   input.value = '';
   input.click();
 }
 
-document.getElementById('photoInput').addEventListener('change', handlePhotoFiles);
+// 相册：弹出文件选择器选图
+function pickFromAlbum() {
+  const input = document.getElementById('photoInputAlbum');
+  input.value = '';
+  input.click();
+}
+
+document.getElementById('photoInputCamera').addEventListener('change', handlePhotoFiles);
+document.getElementById('photoInputAlbum').addEventListener('change', handlePhotoFiles);
 
 function handlePhotoFiles(e) {
   const files = e.target.files;
