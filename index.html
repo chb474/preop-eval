@@ -748,7 +748,7 @@ function clearForm() {
   document.getElementById('photoArea').innerHTML = '';
 }
 
-async function loadFormData(id) {
+async function loadFormData(id) { // fixed: added async
   const p = await dbGet(id);
   if (!p) return;
   document.getElementById('f_name').value = p.name || '';
@@ -1448,8 +1448,7 @@ function deleteCurrentPatient() {
 // ══════════════════════════════════════════
 // Initialize
 // ══════════════════════════════════════════
-// f_date removed, now handled per-ultrasound-exam
-
+// 诊诊日期已迁移至每次超声评估
 // Register Service Worker
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js');
