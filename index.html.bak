@@ -194,10 +194,7 @@ body{background:#f0f4f8;min-height:100vh;padding-bottom:80px}
           <input type="radio" name="f_gender" id="gender_f" value="女"><label for="gender_f">女</label>
         </div>
       </div>
-      <div class="form-row">
-        <label>就诊日期</label>
-        <input type="date" id="f_date">
-      </div>
+
       <div class="form-row">
         <label>住院号 <span style="color:#ea4335">*</span></label>
         <input type="text" id="f_hospId" placeholder="请输入住院号">
@@ -224,37 +221,8 @@ body{background:#f0f4f8;min-height:100vh;padding-bottom:80px}
     <!-- 二、血管超声 -->
     <div class="section-sub">🩸 血管超声评估</div>
     <div class="card">
-      <div style="margin-bottom:6px;font-size:13px;color:#1a73e8;font-weight:500">动脉</div>
-      <table class="sub-table">
-        <tr><th>评估项目</th><th>左侧</th><th>右侧</th></tr>
-        <tr><td>肱动脉内径 (mm)</td><td><input type="text" class="u" data-key="ba_l"></td><td><input type="text" class="u" data-key="ba_r"></td></tr>
-        <tr><td>肱动脉平均血流量 (mL/min)</td><td><input type="text" class="u" data-key="bf_l"></td><td><input type="text" class="u" data-key="bf_r"></td></tr>
-        <tr><td>桡动脉起始段内径 (mm)</td><td><input type="text" class="u" data-key="ra_prox_l"></td><td><input type="text" class="u" data-key="ra_prox_r"></td></tr>
-        <tr><td>桡动脉远端内径 (mm)</td><td><input type="text" class="u" data-key="ra_dist_l"></td><td><input type="text" class="u" data-key="ra_dist_r"></td></tr>
-        <tr><td>尺动脉起始段内径 (mm)</td><td><input type="text" class="u" data-key="ua_prox_l"></td><td><input type="text" class="u" data-key="ua_prox_r"></td></tr>
-        <tr><td>尺动脉远端内径 (mm)</td><td><input type="text" class="u" data-key="ua_dist_l"></td><td><input type="text" class="u" data-key="ua_dist_r"></td></tr>
-        <tr><td>动脉斑块/钙化</td><td><input type="text" class="u" data-key="plaque_l"></td><td><input type="text" class="u" data-key="plaque_r"></td></tr>
-        <tr><td>动脉狭窄部位</td><td><input type="text" class="u" data-key="sten_l"></td><td><input type="text" class="u" data-key="sten_r"></td></tr>
-        <tr><td>Allen试验</td><td><input type="text" class="u" data-key="allen_l" placeholder="阳性/阴性"></td><td><input type="text" class="u" data-key="allen_r"></td></tr>
-      </table>
-
-      <div style="margin:10px 0 6px;font-size:13px;color:#1a73e8;font-weight:500">静脉</div>
-      <table class="sub-table">
-        <tr><th>评估项目</th><th>左侧</th><th>右侧</th></tr>
-        <tr><td>前臂头静脉内径 (mm)</td><td><input type="text" class="u" data-key="cv_forearm_l"></td><td><input type="text" class="u" data-key="cv_forearm_r"></td></tr>
-        <tr><td>上臂头静脉内径 (mm)</td><td><input type="text" class="u" data-key="cv_upper_l"></td><td><input type="text" class="u" data-key="cv_upper_r"></td></tr>
-        <tr><td>头静脉通畅性</td><td><input type="text" class="u" data-key="cvp_l" placeholder="通畅/不通"></td><td><input type="text" class="u" data-key="cvp_r"></td></tr>
-        <tr><td>头静脉距皮深度 (mm)</td><td><input type="text" class="u" data-key="cvd_l"></td><td><input type="text" class="u" data-key="cvd_r"></td></tr>
-        <tr><td>前臂贵要静脉内径 (mm)</td><td><input type="text" class="u" data-key="bv_forearm_l"></td><td><input type="text" class="u" data-key="bv_forearm_r"></td></tr>
-        <tr><td>上臂贵要静脉内径 (mm)</td><td><input type="text" class="u" data-key="bv_upper_l"></td><td><input type="text" class="u" data-key="bv_upper_r"></td></tr>
-        <tr><td>贵要静脉通畅性</td><td><input type="text" class="u" data-key="bvp_l"></td><td><input type="text" class="u" data-key="bvp_r"></td></tr>
-        <tr><td>贵要静脉距皮深度 (mm)</td><td><input type="text" class="u" data-key="bvd_l"></td><td><input type="text" class="u" data-key="bvd_r"></td></tr>
-        <tr><td>静脉分支情况</td><td><input type="text" class="u" data-key="branch_l"></td><td><input type="text" class="u" data-key="branch_r"></td></tr>
-        <tr><td>血管走行变异</td><td><input type="text" class="u" data-key="var_l"></td><td><input type="text" class="u" data-key="var_r"></td></tr>
-        <tr><td>肘正中静脉内径 (mm)</td><td><input type="text" class="u" data-key="mv_l"></td><td><input type="text" class="u" data-key="mv_r"></td></tr>
-        <tr><td>肘穿静脉内径 (mm)</td><td><input type="text" class="u" data-key="pv_l"></td><td><input type="text" class="u" data-key="pv_r"></td></tr>
-        <tr><td>备注</td><td><input type="text" class="u" data-key="note_l"></td><td><input type="text" class="u" data-key="note_r"></td></tr>
-      </table>
+      <button onclick="showUltrasoundForm()" style="width:100%;padding:12px;border:1.5px dashed #1a73e8;border-radius:10px;background:#f0f6ff;color:#1a73e8;font-size:14px;cursor:pointer">＋ 新增超声评估</button>
+      <div id="ultrasoundCount" style="margin-top:8px;font-size:13px;color:#8e99a8;text-align:center">已添加 0 次超声评估</div>
     </div>
 
     <!-- 三、实验室检查 -->
@@ -412,6 +380,53 @@ body{background:#f0f4f8;min-height:100vh;padding-bottom:80px}
   </div>
 </div>
 
+
+    <!-- 超声评估模态弹窗 -->
+    <div class="modal-overlay top hidden" id="ultrasoundModal">
+      <div class="modal-content" style="max-height:92vh">
+        <button class="modal-close" onclick="closeUltrasoundForm()">✕</button>
+        <h2 style="font-size:18px;color:#1a73e8;margin-bottom:16px">新增超声评估</h2>
+        <div class="form-row">
+          <label>检查日期</label>
+          <input type="date" id="us_date">
+        </div>
+        <div style="font-size:13px;color:#1a73e8;font-weight:500;margin:12px 0 8px">动脉</div>
+        <table class="sub-table">
+          <tr><th>评估项目</th><th>左侧</th><th>右侧</th></tr>
+          <tr><td>肱动脉内径 (mm)</td><td><input type="text" class="um" data-key="ba_l"></td><td><input type="text" class="um" data-key="ba_r"></td></tr>
+          <tr><td>肱动脉平均血流量 (mL/min)</td><td><input type="text" class="um" data-key="bf_l"></td><td><input type="text" class="um" data-key="bf_r"></td></tr>
+          <tr><td>桡动脉起始段内径 (mm)</td><td><input type="text" class="um" data-key="ra_prox_l"></td><td><input type="text" class="um" data-key="ra_prox_r"></td></tr>
+          <tr><td>桡动脉远端内径 (mm)</td><td><input type="text" class="um" data-key="ra_dist_l"></td><td><input type="text" class="um" data-key="ra_dist_r"></td></tr>
+          <tr><td>尺动脉起始段内径 (mm)</td><td><input type="text" class="um" data-key="ua_prox_l"></td><td><input type="text" class="um" data-key="ua_prox_r"></td></tr>
+          <tr><td>尺动脉远端内径 (mm)</td><td><input type="text" class="um" data-key="ua_dist_l"></td><td><input type="text" class="um" data-key="ua_dist_r"></td></tr>
+          <tr><td>动脉斑块/钙化</td><td><input type="text" class="um" data-key="plaque_l"></td><td><input type="text" class="um" data-key="plaque_r"></td></tr>
+          <tr><td>动脉狭窄部位</td><td><input type="text" class="um" data-key="sten_l"></td><td><input type="text" class="um" data-key="sten_r"></td></tr>
+          <tr><td>Allen试验</td><td><input type="text" class="um" data-key="allen_l" placeholder="阳性/阴性"></td><td><input type="text" class="um" data-key="allen_r"></td></tr>
+        </table>
+        <div style="font-size:13px;color:#1a73e8;font-weight:500;margin:12px 0 8px">静脉</div>
+        <table class="sub-table">
+          <tr><th>评估项目</th><th>左侧</th><th>右侧</th></tr>
+          <tr><td>前臂头静脉内径 (mm)</td><td><input type="text" class="um" data-key="cv_forearm_l"></td><td><input type="text" class="um" data-key="cv_forearm_r"></td></tr>
+          <tr><td>上臂头静脉内径 (mm)</td><td><input type="text" class="um" data-key="cv_upper_l"></td><td><input type="text" class="um" data-key="cv_upper_r"></td></tr>
+          <tr><td>头静脉通畅性</td><td><input type="text" class="um" data-key="cvp_l" placeholder="通畅/不通"></td><td><input type="text" class="um" data-key="cvp_r"></td></tr>
+          <tr><td>头静脉距皮深度 (mm)</td><td><input type="text" class="um" data-key="cvd_l"></td><td><input type="text" class="um" data-key="cvd_r"></td></tr>
+          <tr><td>前臂贵要静脉内径 (mm)</td><td><input type="text" class="um" data-key="bv_forearm_l"></td><td><input type="text" class="um" data-key="bv_forearm_r"></td></tr>
+          <tr><td>上臂贵要静脉内径 (mm)</td><td><input type="text" class="um" data-key="bv_upper_l"></td><td><input type="text" class="um" data-key="bv_upper_r"></td></tr>
+          <tr><td>贵要静脉通畅性</td><td><input type="text" class="um" data-key="bvp_l"></td><td><input type="text" class="um" data-key="bvp_r"></td></tr>
+          <tr><td>贵要静脉距皮深度 (mm)</td><td><input type="text" class="um" data-key="bvd_l"></td><td><input type="text" class="um" data-key="bvd_r"></td></tr>
+          <tr><td>静脉分支情况</td><td><input type="text" class="um" data-key="branch_l"></td><td><input type="text" class="um" data-key="branch_r"></td></tr>
+          <tr><td>血管走行变异</td><td><input type="text" class="um" data-key="var_l"></td><td><input type="text" class="um" data-key="var_r"></td></tr>
+          <tr><td>肘正中静脉内径 (mm)</td><td><input type="text" class="um" data-key="mv_l"></td><td><input type="text" class="um" data-key="mv_r"></td></tr>
+          <tr><td>肘穿静脉内径 (mm)</td><td><input type="text" class="um" data-key="pv_l"></td><td><input type="text" class="um" data-key="pv_r"></td></tr>
+          <tr><td>备注</td><td><input type="text" class="um" data-key="note_l"></td><td><input type="text" class="um" data-key="note_r"></td></tr>
+        </table>
+        <div class="btn-row" style="margin-top:12px">
+          <button class="btn btn-outline" onclick="closeUltrasoundForm()">取消</button>
+          <button class="btn btn-primary" onclick="saveUltrasoundExam()">确定</button>
+        </div>
+      </div>
+    </div>
+
 <!-- 查看详情 Modal -->
 <div class="modal-overlay top hidden" id="detailModal">
   <div class="modal-content" style="max-height:92vh">
@@ -548,6 +563,7 @@ function getPinyinInitials(name) {
 // 表单操作
 // ══════════════════════════════════════════
 let editingId = null;
+let fUltrasoundExams = [];  // 超声评估列表
 let photos = [];  // base64 array
 
 function updateInitialsPreview() {
@@ -642,7 +658,6 @@ function customConfirm(msg) {
         </div>
       </div>`;
     document.body.appendChild(overlay);
-    document.getElementById('exportCloseBtn').onclick = function() { overlay.remove(); };
     document.getElementById('confirmNoBtn').onclick = function() {
       overlay.remove();
       resolve(false);
@@ -677,12 +692,8 @@ function hasFormData() {
     const el = document.getElementById(id);
     if (el && el.value.trim()) return true;
   }
-  // 检查超声表格输入
-  let hasUltrasound = false;
-  document.querySelectorAll('.u').forEach(function(i) {
-    if (i.value.trim()) hasUltrasound = true;
-  });
-  if (hasUltrasound) return true;
+  // 检查超声
+  if (fUltrasoundExams.length > 0) return true;
   // 检查实验室输入
   let hasLab = false;
   document.querySelectorAll('.lab').forEach(function(i) {
@@ -715,8 +726,8 @@ function hideDetail() {
 }
 
 function clearForm() {
+  fUltrasoundExams = [];
   document.getElementById('f_name').value = '';
-  document.getElementById('f_date').value = '';
   document.getElementById('f_hospId').value = '';
   document.getElementById('f_phone').value = '';
   document.getElementById('f_ward').value = '';
@@ -737,13 +748,12 @@ function clearForm() {
   document.getElementById('photoArea').innerHTML = '';
 }
 
-async function loadFormData(id) {
+async function loadFormData(id) { // fixed: added async
   const p = await dbGet(id);
   if (!p) return;
   document.getElementById('f_name').value = p.name || '';
   updateInitialsPreview();
   document.querySelectorAll('input[name="f_gender"]').forEach(r => r.checked = r.value === (p.gender || '男'));
-  document.getElementById('f_date').value = p.date || '';
   document.getElementById('f_hospId').value = p.hospId || '';
   document.getElementById('f_phone').value = p.phone || '';
   document.getElementById('f_ward').value = p.ward || '';
@@ -755,12 +765,15 @@ async function loadFormData(id) {
     c.checked = (p.diseases || []).includes(c.value);
   });
 
-  // 超声
-  if (p.ultrasound) {
-    document.querySelectorAll('.u').forEach(i => {
-      i.value = p.ultrasound[i.dataset.key] || '';
-    });
+  // 超声 - 支持新旧数据格式
+  fUltrasoundExams = [];
+  if (p.ultrasoundExams && Array.isArray(p.ultrasoundExams)) {
+    fUltrasoundExams = p.ultrasoundExams.map(function(e) { return {id: e.id, date: e.date, data: JSON.parse(JSON.stringify(e.data))}; });
+  } else if (p.ultrasound) {
+    // 旧数据格式迁移
+    fUltrasoundExams = [{ id: Date.now() + '_' + Math.random(), date: p.date || '', data: JSON.parse(JSON.stringify(p.ultrasound)) }];
   }
+  updateUltrasoundCount();
 
   // 实验室
   if (p.lab) {
@@ -936,7 +949,6 @@ function collectFormData() {
   if (!phone) { showToast('请输入手机号'); return null; }
 
   const gender = document.querySelector('input[name="f_gender"]:checked').value;
-  const date = document.getElementById('f_date').value;
   const ward = document.getElementById('f_ward').value.trim();
 
   const diseases = [];
@@ -945,10 +957,7 @@ function collectFormData() {
   });
 
   // 超声
-  const ultrasound = {};
-  document.querySelectorAll('.u').forEach(i => {
-    ultrasound[i.dataset.key] = i.value.trim();
-  });
+  const ultrasoundExams = fUltrasoundExams.slice();
 
   // 实验室
   const lab = {};
@@ -989,12 +998,11 @@ function collectFormData() {
     name,
     initials,
     gender,
-    date,
     hospId,
     phone,
     ward,
     diseases,
-    ultrasound,
+    ultrasoundExams,
     lab,
     risks,
     surgery: { opSides, anastomosis },
@@ -1012,6 +1020,22 @@ async function savePatient() {
 
   try {
     if (editingId) {
+      // 合并已有的超声评估 + 新增的
+      const existing = await dbGet(editingId);
+      if (existing) {
+        let existingExams = [];
+        if (existing.ultrasoundExams && Array.isArray(existing.ultrasoundExams)) {
+          existingExams = existing.ultrasoundExams;
+        } else if (existing.ultrasound) {
+          // 旧数据结构迁移
+          existingExams = [{ id: Date.now() + '_' + Math.random(), date: existing.date || '', data: existing.ultrasound }];
+        }
+        // 保留已有且不在 fUltrasoundExams 中的记录，追加新记录
+        const newIds = new Set(fUltrasoundExams.map(e => e.id));
+        const preserved = existingExams.filter(e => !newIds.has(e.id));
+        data.ultrasoundExams = preserved.concat(fUltrasoundExams);
+        fUltrasoundExams = data.ultrasoundExams.slice();
+      }
       data.id = editingId;
       await dbUpdate(data);
       showToast('✅ 已更新');
@@ -1024,6 +1048,45 @@ async function savePatient() {
   } catch (e) {
     showToast('❌ 保存失败: ' + e.message);
   }
+}
+
+
+// ══════════════════════════════════════════
+// 超声评估新增函数
+// ══════════════════════════════════════════
+function updateUltrasoundCount() {
+  document.getElementById('ultrasoundCount').textContent = '已添加 ' + fUltrasoundExams.length + ' 次超声评估';
+}
+
+function showUltrasoundForm() {
+  // 清空模态表单
+  document.querySelectorAll('#ultrasoundModal .um').forEach(function(i) { i.value = ''; });
+  document.getElementById('us_date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('ultrasoundModal').classList.remove('hidden');
+}
+
+function closeUltrasoundForm() {
+  document.getElementById('ultrasoundModal').classList.add('hidden');
+}
+
+function saveUltrasoundExam() {
+  var date = document.getElementById('us_date').value;
+  if (!date) { showToast('请选择检查日期'); return; }
+  var data = {};
+  document.querySelectorAll('#ultrasoundModal .um').forEach(function(i) {
+    data[i.dataset.key] = i.value.trim();
+  });
+  // 检查是否至少有一个字段有值
+  var hasData = Object.values(data).some(function(v) { return v !== ''; });
+  if (!hasData) { showToast('请至少填写一项超声数据'); return; }
+  fUltrasoundExams.push({
+    id: Date.now() + '_' + Math.random(),
+    date: date,
+    data: data
+  });
+  updateUltrasoundCount();
+  closeUltrasoundForm();
+  showToast('✅ 已添加超声评估');
 }
 
 // ══════════════════════════════════════════
@@ -1122,7 +1185,7 @@ function quickReassess() {
     } else {
       document.getElementById('gender_m').checked = true;
     }
-    document.getElementById('f_date').value = new Date().toISOString().slice(0,10);
+    // date per-ultrasound, not at patient level
     document.getElementById('f_hospId').value = p.hospId || '';
     document.getElementById('f_phone').value = p.phone || '';
     document.getElementById('f_ward').value = p.ward || '';
@@ -1161,7 +1224,7 @@ function exportData() {
       '<div style="display:flex;flex-direction:column;gap:10px">' +
       '<button id="dlBtn" style="width:100%;padding:14px;border:none;border-radius:10px;background:#1a73e8;color:#fff;font-size:16px;cursor:pointer">' + String.fromCharCode(128229) + ' \u4FDD\u5B58\u6587\u4EF6</button>' +
       '<button id="cpBtn" style="width:100%;padding:14px;border:1.5px solid #dde1e6;border-radius:10px;background:#fff;color:#333;font-size:16px;cursor:pointer">' + String.fromCharCode(128203) + ' \u590D\u5236\u5230\u526A\u8D34\u677F</button>' +
-      '<button id="exportCloseBtn" style="width:100%;padding:8px;border:none;background:none;color:#999;font-size:14px;cursor:pointer">\u5173\u95ED</button>' +
+      '<button onclick="this.closest('.modal-overlay').remove()" style="width:100%;padding:8px;border:none;background:none;color:#999;font-size:14px;cursor:pointer">\u5173\u95ED</button>' +
       '</div></div>';
     document.body.appendChild(overlay);
 
@@ -1257,7 +1320,6 @@ function renderDetail(p) {
   html += '<div class="section-sub">📋 基本信息</div><div class="card" style="font-size:14px">';
   html += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">`;
   html += `<div><strong>性别：</strong>${p.gender || '-'}</div>`;
-  html += `<div><strong>就诊日期：</strong>${p.date || '-'}</div>`;
   html += `<div><strong>住院号：</strong>${p.hospId || '-'}</div>`;
   html += `<div><strong>手机号：</strong>${p.phone || '-'}</div>`;
   html += `<div><strong>病区/床号：</strong>${p.ward || '-'}</div>`;
@@ -1265,30 +1327,39 @@ function renderDetail(p) {
   html += `<div><strong>原发病：</strong>${diseases || '-'}</div>`;
   html += '</div></div>';
 
-  // 超声
-  if (p.ultrasound) {
-    const u = p.ultrasound;
-    html += '<div class="section-sub">🩸 血管超声</div><div class="card">';
-    // 动脉组
-    html += '<div style="font-size:13px;color:#1a73e8;font-weight:500;margin-bottom:4px">动脉</div>';
-    html += '<table class="sub-table"><tr><th>项目</th><th>左侧</th><th>右侧</th></tr>';
-    const arteryItems = [['肱动脉内径','ba_l','ba_r'],['肱动脉血流量','bf_l','bf_r'],['桡动脉起始段内径','ra_prox_l','ra_prox_r'],['桡动脉远端内径','ra_dist_l','ra_dist_r'],['尺动脉起始段内径','ua_prox_l','ua_prox_r'],['尺动脉远端内径','ua_dist_l','ua_dist_r'],['动脉斑块/钙化','plaque_l','plaque_r'],['动脉狭窄部位','sten_l','sten_r'],['Allen试验','allen_l','allen_r']];
-    for (const [label, kL, kR] of arteryItems) {
-      const vl = u[kL] || '-', vr = u[kR] || '-';
-      if (vl == '-' && vr == '-') continue;
-      html += `<tr><td>${label}</td><td>${vl}</td><td>${vr}</td></tr>`;
+  // 超声 - 支持多次独立评估，按日期倒序
+  const exams = (p.ultrasoundExams && Array.isArray(p.ultrasoundExams))
+    ? p.ultrasoundExams
+    : (p.ultrasound
+      ? [{ id: 'old', date: p.date || '', data: p.ultrasound }]
+      : []);
+  if (exams.length > 0) {
+    exams.sort(function(a,b) { return (b.date || '').localeCompare(a.date || ''); });
+    for (const exam of exams) {
+      const u = exam.data || {};
+      html += '<div class="section-sub">🩸 血管超声 — ' + (exam.date || '') + '</div><div class="card">';
+      // 动脉组
+      html += '<div style="font-size:13px;color:#1a73e8;font-weight:500;margin-bottom:4px">动脉</div>';
+      html += '<table class="sub-table"><tr><th>项目</th><th>左侧</th><th>右侧</th></tr>';
+      const arteryItems = [['肱动脉内径','ba_l','ba_r'],['肱动脉血流量','bf_l','bf_r'],['桡动脉起始段内径','ra_prox_l','ra_prox_r'],['桡动脉远端内径','ra_dist_l','ra_dist_r'],['尺动脉起始段内径','ua_prox_l','ua_prox_r'],['尺动脉远端内径','ua_dist_l','ua_dist_r'],['动脉斑块/钙化','plaque_l','plaque_r'],['动脉狭窄部位','sten_l','sten_r'],['Allen试验','allen_l','allen_r']];
+      for (const [label, kL, kR] of arteryItems) {
+        const vl = u[kL] || '-', vr = u[kR] || '-';
+        if (vl == '-' && vr == '-') continue;
+        html += `<tr><td>${label}</td><td>${vl}</td><td>${vr}</td></tr>`;
+      }
+      html += '</table>';
+      // 静脉组
+      html += '<div style="font-size:13px;color:#1a73e8;font-weight:500;margin:10px 0 4px">静脉</div>';
+      html += '<table class="sub-table"><tr><th>项目</th><th>左侧</th><th>右侧</th></tr>';
+      const veinItems = [['前臂头静脉内径','cv_forearm_l','cv_forearm_r'],['上臂头静脉内径','cv_upper_l','cv_upper_r'],['头静脉通畅性','cvp_l','cvp_r'],['头静脉距皮深度','cvd_l','cvd_r'],['前臂贵要静脉内径','bv_forearm_l','bv_forearm_r'],['上臂贵要静脉内径','bv_upper_l','bv_upper_r'],['贵要静脉通畅性','bvp_l','bvp_r'],['贵要静脉距皮深度','bvd_l','bvd_r'],['静脉分支','branch_l','branch_r'],['血管走行变异','var_l','var_r'],['肘正中静脉内径','mv_l','mv_r'],['肘穿静脉内径','pv_l','pv_r'],['备注','note_l','note_r']];
+      for (const [label, kL, kR] of veinItems) {
+        const vl = u[kL] || '-', vr = u[kR] || '-';
+        if (vl == '-' && vr == '-') continue;
+        html += `<tr><td>${label}</td><td>${vl}</td><td>${vr}</td></tr>`;
+      }
+      html += '</table>';
+      html += '<div style="border-top:1px dashed #d0d6df;margin:8px 0 0"></div></div>';
     }
-    html += '</table>';
-    // 静脉组
-    html += '<div style="font-size:13px;color:#1a73e8;font-weight:500;margin:10px 0 4px">静脉</div>';
-    html += '<table class="sub-table"><tr><th>项目</th><th>左侧</th><th>右侧</th></tr>';
-    const veinItems = [['前臂头静脉内径','cv_forearm_l','cv_forearm_r'],['上臂头静脉内径','cv_upper_l','cv_upper_r'],['头静脉通畅性','cvp_l','cvp_r'],['头静脉距皮深度','cvd_l','cvd_r'],['前臂贵要静脉内径','bv_forearm_l','bv_forearm_r'],['上臂贵要静脉内径','bv_upper_l','bv_upper_r'],['贵要静脉通畅性','bvp_l','bvp_r'],['贵要静脉距皮深度','bvd_l','bvd_r'],['静脉分支','branch_l','branch_r'],['血管走行变异','var_l','var_r'],['肘正中静脉内径','mv_l','mv_r'],['肘穿静脉内径','pv_l','pv_r'],['备注','note_l','note_r']];
-    for (const [label, kL, kR] of veinItems) {
-      const vl = u[kL] || '-', vr = u[kR] || '-';
-      if (vl == '-' && vr == '-') continue;
-      html += `<tr><td>${label}</td><td>${vl}</td><td>${vr}</td></tr>`;
-    }
-    html += '</table></div>';
   }
 
   // 实验室
@@ -1377,16 +1448,16 @@ function deleteCurrentPatient() {
 // ══════════════════════════════════════════
 // Initialize
 // ══════════════════════════════════════════
-// Set today's date as default
-document.getElementById('f_date').value = new Date().toISOString().split('T')[0];
-
-// Register Service Worker
+// 诊诊日期已迁移至每次超声评估
+// Register Service Worker - force update old cache
 if ('serviceWorker' in navigator) {
+  // 先注销所有旧的 Service Worker
   navigator.serviceWorker.getRegistrations().then(function(regs) {
     for (var i = 0; i < regs.length; i++) {
       regs[i].unregister();
     }
   }).then(function() {
+    // 重新注册新的 Service Worker
     navigator.serviceWorker.register('sw.js?v=2').then(function(reg) {
       reg.update();
     });
