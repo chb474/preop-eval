@@ -417,11 +417,11 @@ body{background:#f0f4f8;min-height:100vh;padding-bottom:80px}
   <div class="modal-content" style="max-height:92vh">
     <button class="modal-close" onclick="hideDetail()">✕</button>
     <div id="detailContent"></div>
-    <div class="btn-row" style="margin-top:12px">
-      <button class="btn btn-danger" onclick="deleteCurrentPatient()">🗑️ 删除</button>
-      <button class="btn btn-primary" onclick="editCurrentPatient()">✏️ 编辑</button>
+    <div     <div class="btn-row" style="margin-top:12px;display:flex;flex-wrap:wrap;gap:8px">
+      <button class="btn btn-primary" onclick="quickReassess()" style="flex:1;min-width:120px">🔄 快速再评估</button>
+      <button class="btn btn-primary" onclick="editCurrentPatient()" style="flex:1;min-width:80px">✏️ 编辑</button>
+      <button class="btn btn-danger" onclick="deleteCurrentPatient()" style="flex:1;min-width:80px">🗑️ 删除</button>
     </div>
-  </div>
 </div>
 
 <script>
@@ -1054,22 +1054,43 @@ async function renderList() {
   }
   emptyEl.classList.add('hidden');
 
-  listEl.innerHTML = filtered.map(p => {
-    const nameInitial = p.name ? p.name.charAt(0) : '?';
-    const hospDisplay = p.hospId ? `住院号: ${p.hospId}` : '';
-    const dateDisplay = p.date || '';
-    return `<div class="patient-item" onclick="viewPatient(${p.id})">
-      <div class="patient-avatar">${nameInitial}</div>
-      <div class="patient-info">
-        <div class="name">${escapeHtml(p.name || '未知')} <span class="initials">${p.initials || ''}</span></div>
-        <div class="meta">
-          <span>${dateDisplay}</span>
-          <span>${hospDisplay}</span>
-          <span>${p.phone || ''}</span>
-        </div>
-      </div>
-      <button class="patient-delete" onclick="event.stopPropagation();deletePatient(${p.id})">×</button>
-    </div>`;
+    // sort by name+time, calculate sequence for same-name patients
+  filtered.sort(function(a,b) {
+    var na = (a.name || '').toLowerCase(), nb = (b.name || '').toLowerCase();
+    if (na !== nb) return na < nb ? -1 : 1;
+    var da = a.createdAt || a.updatedAt || '', db = b.createdAt || b.updatedAt || '';
+    return da < db ? -1 : da > db ? 1 : 0;
+  });
+  var nameCount = {};
+  filtered.forEach(function(p) {
+    var k = p.name || '';
+    if (!nameCount[k]) nameCount[k] = 0;
+    nameCount[k]++;
+    p._seq = nameCount[k];
+  });
+
+  listEl.innerHTML = filtered.map(function(p) {
+    var nameInitial = p.name ? p.name.charAt(0) : '?';
+    var hospDisplay = p.hospId ? '住院号: ' + p.hospId : '';
+    var dateDisplay = p.date || '';
+    var seqBadge = '';
+    var k = p.name || '';
+    if (nameCount[k] > 1) {
+      seqBadge = '<span style="display:inline-block;font-size:10px;color:#fff;background:#1a73e8;border-radius:8px;padding:1px 6px;margin-left:4px">第' + p._seq + '次评估</span>';
+    }
+    return '<div class="patient-item" onclick="viewPatient(' + p.id + ')">' +
+      '<div class="patient-avatar">' + nameInitial + '</div>' +
+      '<div class="patient-info">' +
+        '<div class="name">' + escapeHtml(p.name || '未知') + ' <span class="initials">' + (p.initials || '') + '</span></div>' +
+        '<div class="meta">' +
+          '<span>' + dateDisplay + '</span>' +
+          '<span>' + hospDisplay + '</span>' +
+          '<span>' + (p.phone || '') + '</span>' +
+          (seqBadge ? '<span>' + seqBadge + '</span>' : '') +
+        '</div>' +
+      '</div>' +
+      '<button class="patient-delete" onclick="event.stopPropagation();deletePatient(' + p.id + ')">×</button>' +
+    '</div>';
   }).join('');
 }
 
@@ -1081,6 +1102,36 @@ function escapeHtml(text) {
 
 function doSearch() {
   renderList();
+}
+
+// ── 快速再评估 ──
+function quickReassess() {
+  if (detailPatientId === null) return;
+  dbGet(detailPatientId).then(function(p) {
+    if (!p) return;
+    document.getElementById('detailModal').classList.add('hidden');
+    editingId = null;
+    document.getElementById('formTitle').textContent = '新增评估（基于 ' + (p.name || '') + '）';
+    clearForm();
+    document.getElementById('f_name').value = p.name || '';
+    if (p.gender === '女') {
+      document.getElementById('gender_f').checked = true;
+    } else {
+      document.getElementById('gender_m').checked = true;
+    }
+    document.getElementById('f_date').value = new Date().toISOString().slice(0,10);
+    document.getElementById('f_hospId').value = p.hospId || '';
+    document.getElementById('f_phone').value = p.phone || '';
+    document.getElementById('f_ward').value = p.ward || '';
+    if (p.diseases && p.diseases.length) {
+      p.diseases.forEach(function(d) {
+        var cb = document.querySelector('input[id^="disease_"][value="' + d + '"]');
+        if (cb) cb.checked = true;
+      });
+    }
+    updateInitialsPreview();
+    document.getElementById('formModal').classList.remove('hidden');
+  });
 }
 
 // ── 数据导出 / 导入（跨设备迁移）──
