@@ -1337,7 +1337,7 @@ function renderUltrasoundHtml(exam, idx, isFirst, patientId) {
   if (isFirst) {
     var h = '<div style="margin-top:12px;border:1px solid #e0e7ef;border-radius:10px;padding:12px;background:#fafcff">';
     h += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">';
-    h += '<span style="font-size:14px;font-weight:600;color:#1a73e8">\U0001f4c5 ' + (exam.date || '未知日期') + '</span>';
+    h += '<span style="font-size:14px;font-weight:600;color:#1a73e8">📅 ' + (exam.date || '未知日期') + '</span>';
     h += '<span style="font-size:11px;color:#1a73e8;background:#e8f0fe;padding:2px 8px;border-radius:8px">最新评估</span>';
     h += '</div>';
     h += _renderUsTable(u);
@@ -1351,7 +1351,7 @@ function renderUltrasoundHtml(exam, idx, isFirst, patientId) {
   var arrowStyle = _expandedUsId === hid ? '▼' : '▶';
   var h = '<div style="margin-top:6px;border:1px solid #e8ecf0;border-radius:8px;overflow:hidden">';
   h += '<div onclick=_toggleUs("' + hid + '") style="padding:10px 12px;background:#f5f7fa;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none">';
-  h += '<span style="font-size:13px;color:#333;font-weight:500">' + arrowStyle + ' \U0001f4c5 ' + (exam.date || '未知日期') + '</span>';
+  h += '<span style="font-size:13px;color:#333;font-weight:500">' + arrowStyle + ' 📅 ' + (exam.date || '未知日期') + '</span>';
   h += '<span style="font-size:11px;color:#1a73e8;cursor:pointer" onclick="event.stopPropagation();openEditUs(' + patientId + ',' + idx + ')">\u270f️ 编辑</span>';
   h += '</div>';
   h += '<div id="' + hid + '" style="padding:12px;display:' + displayStyle + '">';
@@ -1522,7 +1522,7 @@ function closeUltrasoundForm() {
   html += '<div class="section-sub">📋 基本信息</div><div class="card" style="font-size:14px">';
   html += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">`;
   html += `<div><strong>性别：</strong>${p.gender || '-'}</div>`;
-  html += `<div><strong>就诊日期：</strong>${p.date || '-'}</div>`;
+  html += `<div><strong>首次就诊日期：</strong>${p.date || '-'}</div>`;
   html += `<div><strong>住院号：</strong>${p.hospId || '-'}</div>`;
   html += `<div><strong>手机号：</strong>${p.phone || '-'}</div>`;
   html += `<div><strong>病区/床号：</strong>${p.ward || '-'}</div>`;
