@@ -1,4 +1,4 @@
-const CACHE = 'preop-eval-v2';
+const CACHE = 'preop-eval-v3';
 const STATIC_ASSETS = [
   './manifest.json',
   './icons/icon-192.png',

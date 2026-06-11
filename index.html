@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#1a73e8">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="术前评估">
@@ -604,18 +606,28 @@ const STORE = 'patients';
 let _db = null;
 function openDB() {
   return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, DB_VER);
-    req.onupgradeneeded = e => {
-      const db = e.target.result;
+    var req = indexedDB.open(DB_NAME, DB_VER);
+    req.onupgradeneeded = function(e) {
+      var db = e.target.result;
       if (!db.objectStoreNames.contains(STORE)) {
-        const store = db.createObjectStore(STORE, { keyPath: 'id', autoIncrement: true });
+        var store = db.createObjectStore(STORE, { keyPath: 'id', autoIncrement: true });
         store.createIndex('name', 'name', { unique: false });
         store.createIndex('initials', 'initials', { unique: false });
         store.createIndex('hospId', 'hospId', { unique: false });
       }
     };
-    req.onsuccess = e => resolve(e.target.result);
-    req.onerror = e => reject(e.target.error);
+    req.onsuccess = function(e) {
+      // 确保数据库已完全准备好
+      var db = e.target.result;
+      resolve(db);
+    };
+    req.onerror = function(e) {
+      reject(e.target.error);
+    };
+    // 处理数据库 blocked 情况
+    req.onblocked = function() {
+      reject(new Error('IndexedDB blocked'));
+    };
   });
 }
 
@@ -1886,19 +1898,28 @@ document.addEventListener('click', function(e) {
 document.getElementById('f_date').value = new Date().toISOString().split('T')[0];
 document.getElementById('us_date').value = new Date().toISOString().split('T')[0];
 
-// Register Service Worker
+// Register Service Worker (force update every page load)
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.getRegistrations().then(function(regs) {
     for (var i = 0; i < regs.length; i++) {
       regs[i].unregister();
     }
   }).then(function() {
-    navigator.serviceWorker.register('sw.js?v=2').then(function(reg) {
+    navigator.serviceWorker.register('sw.js?v=3', {updateViaCache: 'none'}).then(function(reg) {
       reg.update();
+      reg.addEventListener('updatefound', function() {
+        var newWorker = reg.installing;
+        newWorker.addEventListener('statechange', function() {
+          if (newWorker.state === 'activated') {
+            window.location.reload();
+          }
+        });
+      });
+    })['catch'](function(err) {
+      // Service Worker 注册失败，不影响正常使用
     });
   });
 }
-
 dbReady.then(function() { renderList(); });
 // 安全兜底：500ms后如果列表还是空的且数据库有数据，重新渲染
 setTimeout(function() {
