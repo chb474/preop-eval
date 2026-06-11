@@ -514,6 +514,60 @@ body{background:#f0f4f8;min-height:100vh;padding-bottom:80px}
         <input type="checkbox" id="bi_disease_other" value="其他"><label for="bi_disease_other">其他</label>
       </div>
     </div>
+    <div style="margin:16px 0 8px;border-top:1px solid #e8ecf0;padding-top:12px;font-size:15px;font-weight:600;color:#333">⚠️ 危险因素与用药史</div>
+    <div class="risk-row">
+      <span class="risk-label">糖尿病</span>
+      <div class="radio-group">
+        <input type="radio" name="bi_risk_dm" value="无" id="bi_risk_dm_no"><label for="bi_risk_dm_no">无</label>
+        <input type="radio" name="bi_risk_dm" value="有" id="bi_risk_dm_yes"><label for="bi_risk_dm_yes">有</label>
+      </div>
+    </div>
+    <div class="risk-row">
+      <span class="risk-label">高血压</span>
+      <div class="radio-group">
+        <input type="radio" name="bi_risk_htn" value="无" id="bi_risk_htn_no"><label for="bi_risk_htn_no">无</label>
+        <input type="radio" name="bi_risk_htn" value="有" id="bi_risk_htn_yes"><label for="bi_risk_htn_yes">有</label>
+      </div>
+    </div>
+    <div class="risk-row">
+      <span class="risk-label">心血管病</span>
+      <div class="radio-group">
+        <input type="radio" name="bi_risk_cvd" value="无" id="bi_risk_cvd_no"><label for="bi_risk_cvd_no">无</label>
+        <input type="radio" name="bi_risk_cvd" value="有" id="bi_risk_cvd_yes"><label for="bi_risk_cvd_yes">有</label>
+      </div>
+    </div>
+    <div class="risk-row">
+      <span class="risk-label">PVD</span>
+      <div class="radio-group">
+        <input type="radio" name="bi_risk_pvd" value="无" id="bi_risk_pvd_no"><label for="bi_risk_pvd_no">无</label>
+        <input type="radio" name="bi_risk_pvd" value="有" id="bi_risk_pvd_yes"><label for="bi_risk_pvd_yes">有</label>
+      </div>
+    </div>
+    <div class="risk-row">
+      <span class="risk-label">吸烟</span>
+      <div class="radio-group">
+        <input type="radio" name="bi_risk_smk" value="无" id="bi_risk_smk_no"><label for="bi_risk_smk_no">无</label>
+        <input type="radio" name="bi_risk_smk" value="有" id="bi_risk_smk_yes"><label for="bi_risk_smk_yes">有</label>
+      </div>
+    </div>
+    <div class="risk-row">
+      <span class="risk-label">免疫制剂</span>
+      <div class="radio-group">
+        <input type="radio" name="bi_risk_immuno" value="无" id="bi_risk_immuno_no"><label for="bi_risk_immuno_no">无</label>
+        <input type="radio" name="bi_risk_immuno" value="有" id="bi_risk_immuno_yes"><label for="bi_risk_immuno_yes">有</label>
+      </div>
+    </div>
+    <div class="form-row">
+      <label>用药</label>
+      <div class="check-group">
+        <input type="checkbox" id="bi_med_antipt" value="抗血小板"><label for="bi_med_antipt">抗血小板</label>
+        <input type="checkbox" id="bi_med_anticoag" value="抗凝"><label for="bi_med_anticoag">抗凝</label>
+        <input type="checkbox" id="bi_med_statin" value="他沏"><label for="bi_med_statin">他沏</label>
+        <input type="checkbox" id="bi_med_acei" value="ACEI/ARB"><label for="bi_med_acei">ACEI/ARB</label>
+        <input type="checkbox" id="bi_med_epo" value="EPO"><label for="bi_med_epo">EPO</label>
+        <input type="checkbox" id="bi_med_other" value="其他"><label for="bi_med_other">其他</label>
+      </div>
+    </div>
     <div style="display:flex;gap:12px;margin-top:20px">
       <button class="btn btn-outline" onclick="closeBasicInfo()" style="flex:1">取消</button>
       <button class="btn btn-primary" onclick="saveBasicInfo()" style="flex:1">保存</button>
@@ -872,23 +926,6 @@ async function loadFormData(id) {
     document.querySelectorAll('.lab').forEach(i => {
       i.value = p.lab[i.dataset.key] || '';
     });
-  }
-
-  // 危险因素
-  if (p.risks) {
-    const r = p.risks;
-    document.querySelectorAll('input[name="risk_dm"]').forEach(x => x.checked = x.value === (r.dm || '无'));
-    document.getElementById('risk_dm_dur').value = r.dmDur || '';
-    document.querySelectorAll('input[name="risk_htn"]').forEach(x => x.checked = x.value === (r.htn || '无'));
-    document.getElementById('risk_htn_dur').value = r.htnDur || '';
-    document.querySelectorAll('input[name="risk_cad"]').forEach(x => x.checked = x.value === (r.cad || '无'));
-    document.querySelectorAll('input[name="risk_pvd"]').forEach(x => x.checked = x.value === (r.pvd || '无'));
-    document.querySelectorAll('input[name="risk_smk"]').forEach(x => x.checked = x.value === (r.smk || '无'));
-    document.getElementById('risk_smk_qty').value = r.smkQty || '';
-    document.querySelectorAll('#formModal .check-group input[type="checkbox"][id^="med_"]').forEach(c => {
-      c.checked = (r.medications || []).includes(c.value);
-    });
-    document.querySelectorAll('input[name="risk_immuno"]').forEach(x => x.checked = x.value === (r.immuno || '无'));
   }
 
   // 手术建议
@@ -1583,7 +1620,17 @@ function closeUltrasoundForm() {
   html += `<div><strong>手机号：</strong>${p.phone || '-'}</div>`;
   html += `<div><strong>病区/床号：</strong>${p.ward || '-'}</div>`;
   const diseases = (p.diseases || []).join('、');
-  html += `<div><strong>原发病：</strong>${diseases || '-'}</div>`;
+  html += `<div><strong>原发病：</strong>${diseases || '-'}</div>`;html += '<div><strong>原发病：</strong>' + (diseases || '-') + '</div>';
+    if (p.risks) {
+      const r = p.risks;
+      html += '<div><strong>糖尿病：</strong>' + (r.dm || '-') + '</div>';
+      html += '<div><strong>高血压：</strong>' + (r.htn || '-') + '</div>';
+      html += '<div><strong>心血管病：</strong>' + (r.cvd || '-') + '</div>';
+      html += '<div><strong>PVD：</strong>' + (r.pvd || '-') + '</div>';
+      html += '<div><strong>吸烟：</strong>' + (r.smk || '-') + (r.smk === '有' && r.smkQty ? '(' + r.smkQty + '支/天)' : '') + '</div>';
+      html += '<div><strong>免疫制剂：</strong>' + (r.immuno || '-') + '</div>';
+      html += '<div style="grid-column:1/-1"><strong>用药：</strong>' + ((r.medications && r.medications.length) ? r.medications.join('、') : '-') + '</div>';
+    }
   html += '</div></div>';
 
   // 超声 - 支持多次评估记录
@@ -1700,6 +1747,16 @@ function showBasicInfo(id) {
     document.getElementById('bi_hospId').value = p.hospId || '';
     document.getElementById('bi_phone').value = p.phone || '';
     document.getElementById('bi_ward').value = p.ward || '';
+    // 危险因素
+    var ri = p.risks || {};
+    document.querySelectorAll('#basicInfoModal input[name^="bi_risk_"]').forEach(function(rb) {
+      var field = rb.name.replace('bi_risk_', '');
+      rb.checked = rb.value === (ri[field] || '无');
+    });
+    // 用药
+    document.querySelectorAll('#basicInfoModal input[type="checkbox"][id^="bi_med_"]').forEach(function(cb) {
+      cb.checked = (ri.medications || []).indexOf(cb.value) >= 0;
+    });
     document.querySelectorAll('#basicInfoModal .check-group input[type="checkbox"]').forEach(function(c) {
       c.checked = (p.diseases || []).includes(c.value);
     });
@@ -1723,6 +1780,16 @@ function saveBasicInfo() {
     document.querySelectorAll('#basicInfoModal .check-group input[type="checkbox"]:checked').forEach(function(c) {
       p.diseases.push(c.value);
     });
+    // 危险因素
+    if (!p.risks) p.risks = {};
+    document.querySelectorAll('#basicInfoModal input[name^="bi_risk_"]:checked').forEach(function(rb) {
+      var field = rb.name.replace('bi_risk_', '');
+      p.risks[field] = rb.value;
+    });
+    p.risks.medications = [];
+    document.querySelectorAll('#basicInfoModal input[type="checkbox"][id^="bi_med_"]:checked').forEach(function(cb) {
+      p.risks.medications.push(cb.value);
+    });
     p.updatedAt = Date.now();
     dbUpdate(p).then(function() {
       showToast('✅ 基本信息已更新');
@@ -1731,7 +1798,6 @@ function saveBasicInfo() {
     });
   });
 }
-
 function closeBasicInfo() {
   document.getElementById('basicInfoModal').classList.add('hidden');
   biPatientId = null;
