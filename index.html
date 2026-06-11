@@ -620,10 +620,10 @@ function showEditForm(id) {
   document.getElementById('formModal').classList.remove('hidden');
 }
 
-function hideForm() {
-  // 如果有输入数据，二次确认
-  if (hasFormData()) {
-    if (!confirm('当前有未保存的数据，确定退出吗？')) return;
+function hideForm(force) {
+  // 只在取消时做二次确认，保存（force=true）跳过
+  if (!force && hasFormData()) {
+    if (!confirm('确定退出？未保存的数据将丢失。')) return;
   }
   document.getElementById('formModal').classList.add('hidden');
   renderList();
@@ -976,7 +976,7 @@ async function savePatient() {
       await dbAdd(data);
       showToast('✅ 已保存');
     }
-    hideForm();
+    hideForm(true);
     renderList();
   } catch (e) {
     showToast('❌ 保存失败: ' + e.message);
