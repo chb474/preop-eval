@@ -380,12 +380,9 @@ body{background:#f0f4f8;min-height:100vh;padding-bottom:80px}
     <div class="section-sub">📷 照片</div>
     <div class="card">
       <div class="photo-area" id="photoArea"></div>
-      <!-- 拍照：专门调用 capture，定向启动相机 -->
-      <input type="file" id="photoInputCamera" accept="image/*" capture="environment" style="display:none">
-      <!-- 相册：不带 capture，弹出文件选择器 -->
       <input type="file" id="photoInputAlbum" accept="image/*" style="display:none" multiple>
       <div class="btn-row">
-        <button class="btn btn-outline btn-sm" onclick="takePhoto()">📸 拍照</button>
+        <button class="btn btn-outline btn-sm" onclick="openCamera()">📸 拍照</button>
         <button class="btn btn-outline btn-sm" onclick="pickFromAlbum()">🖼️ 从相册选择</button>
       </div>
     </div>
@@ -679,13 +676,6 @@ async function loadFormData(id) {
 }
 
 // ── Photo Handling ──
-// 拍照：capture="environment" 定向调用后置摄像头拍照
-function takePhoto() {
-  const input = document.getElementById('photoInputCamera');
-  input.value = '';
-  input.click();
-}
-
 // 相册：弹出文件选择器选图
 function pickFromAlbum() {
   const input = document.getElementById('photoInputAlbum');
@@ -693,7 +683,6 @@ function pickFromAlbum() {
   input.click();
 }
 
-document.getElementById('photoInputCamera').addEventListener('change', handlePhotoFiles);
 document.getElementById('photoInputAlbum').addEventListener('change', handlePhotoFiles);
 
 function handlePhotoFiles(e) {
@@ -721,6 +710,94 @@ function deletePhoto(idx) {
   photos.splice(idx, 1);
   document.getElementById('photoArea').innerHTML = '';
   photos.forEach((photo, i) => addPhotoElement(photo, i));
+}
+
+// ── 内置相机（getUserMedia，不依赖文件选择器）──
+let cameraStream = null;
+
+function openCamera() {
+  // 创建相机模态框 DOM
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay top';
+  overlay.id = 'cameraModal_ov';
+  overlay.style.cssText = 'z-index:9999;display:flex;align-items:center;justify-content:center';
+  overlay.style.background = 'rgba(0,0,0,0.9)';
+  overlay.onclick = function(e) { if (e.target === overlay) closeCamera(); };
+
+  overlay.innerHTML = `
+    <div style="background:#000;border-radius:12px;overflow:hidden;width:90vw;max-width:420px;position:relative">
+      <video id="camPreview" autoplay playsinline style="width:100%;display:block;max-height:70vh;object-fit:contain;background:#111"></video>
+      <div style="display:flex;gap:24px;justify-content:center;align-items:center;padding:16px 20px;background:#1a1a1a">
+        <div onclick="closeCamera()" style="color:#ff6b6b;font-size:14px;cursor:pointer;padding:8px 16px">取消</div>
+        <div onclick="captureFromCamera()" style="width:60px;height:60px;border-radius:50%;border:4px solid #fff;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center">
+          <div style="width:44px;height:44px;border-radius:50%;background:#fff"></div>
+        </div>
+        <div style="width:60px"></div>
+      </div>
+      <div id="camErrorMsg" style="display:none;padding:30px;text-align:center;color:#ff6b6b;background:#222;font-size:15px"></div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  // 启动后置摄像头
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    showCamError('当前环境不支持相机访问');
+    return;
+  }
+
+  navigator.mediaDevices.getUserMedia({
+    video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
+    audio: false
+  }).then(function(stream) {
+    cameraStream = stream;
+    var video = document.getElementById('camPreview');
+    if (video) video.srcObject = stream;
+  }).catch(function(err) {
+    if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+      showCamError('❌ 相机权限被拒绝<br>请在手机设置中打开此APP的相机权限');
+    } else if (err.name === 'NotFoundError') {
+      showCamError('❌ 未检测到摄像头');
+    } else {
+      showCamError('❌ 无法打开相机: ' + err.message);
+    }
+    // 3秒后自动关闭
+    setTimeout(closeCamera, 3000);
+  });
+}
+
+function showCamError(msg) {
+  var el = document.getElementById('camErrorMsg');
+  if (el) { el.innerHTML = msg; el.style.display = 'block'; }
+}
+
+function captureFromCamera() {
+  var video = document.getElementById('camPreview');
+  if (!video || !video.videoWidth) return;
+
+  var canvas = document.createElement('canvas');
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  var ctx = canvas.getContext('2d');
+  ctx.drawImage(video, 0, 0);
+
+  var dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+  if (photos.length >= 9) {
+    showCamError('最多拍摄9张照片');
+    setTimeout(closeCamera, 1000);
+    return;
+  }
+  photos.push(dataUrl);
+  addPhotoElement(dataUrl, photos.length - 1);
+  closeCamera();
+}
+
+function closeCamera() {
+  if (cameraStream) {
+    cameraStream.getTracks().forEach(function(t) { t.stop(); });
+    cameraStream = null;
+  }
+  var el = document.getElementById('cameraModal_ov');
+  if (el) el.remove();
 }
 
 // ── Save ──
