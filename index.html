@@ -1010,6 +1010,18 @@ async function savePatient() {
   if (!data) return;
 
   try {
+    // 住院号重复检测
+    if (data.hospId) {
+      const all = await dbGetAll();
+      const dup = all.find(function(p) {
+        return p.hospId === data.hospId && p.id !== editingId;
+      });
+      if (dup) {
+        var ok = await customConfirm('⚠️ 住院号 "' + data.hospId + '" 已存在\n患者：' + dup.name + '\n\n确定要再次保存吗？');
+        if (!ok) return;
+      }
+    }
+
     if (editingId) {
       data.id = editingId;
       await dbUpdate(data);
