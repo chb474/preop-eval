@@ -1495,10 +1495,13 @@ function openEditUs(patientId, examIdx) {
     if (!Array.isArray(exams) && p.ultrasound && typeof p.ultrasound === 'object') {
       exams = [{date: p.date || '', data: p.ultrasound}];
     }
-    var exam = exams[examIdx];
+    // 按日期降序排列，与renderDetail展示顺序保持一致
+    var sorted = exams.slice().sort(function(a, b) { return (b.date || '') < (a.date || '') ? -1 : (b.date || '') > (a.date || '') ? 1 : 0; });
+    var exam = sorted[examIdx];
     if (!exam) { showToast('❌ 未找到该次评估记录'); return; }
     window._usPatientId = patientId;
-    window._usEditIdx = examIdx;
+    // 找到该记录在原数组中的实际索引，保证保存时更新正确的条目
+    window._usEditIdx = exams.indexOf(exam);
     document.getElementById('us_date').value = exam.date || '';
     document.querySelectorAll('#ultrasoundFormModal .u').forEach(function(i) {
       i.value = (exam.data || {})[i.dataset.key] || '';
