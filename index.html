@@ -1433,6 +1433,9 @@ function addUltrasoundExam(patientId) {
     document.getElementById('us_date').value = new Date().toISOString().slice(0,10);
     document.querySelectorAll('#ultrasoundFormModal .u').forEach(function(i) { i.value = ''; });
     document.getElementById('ultrasoundFormModal').classList.remove('hidden');
+    // 弹窗内容滚动到最前面
+    var mc = document.querySelector('#ultrasoundFormModal .modal-content');
+    if (mc) mc.scrollTop = 0;
   });
 }
 
@@ -1501,6 +1504,9 @@ function openEditUs(patientId, examIdx) {
     });
     document.getElementById('usSaveBtn').textContent = '保存修改';
     document.getElementById('ultrasoundFormModal').classList.remove('hidden');
+    // 弹窗内容滚动到最前面
+    var mc = document.querySelector('#ultrasoundFormModal .modal-content');
+    if (mc) mc.scrollTop = 0;
   });
 }
 function closeUltrasoundForm() {
