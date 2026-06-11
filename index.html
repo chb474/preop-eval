@@ -665,6 +665,9 @@ function showAddForm() {
   document.getElementById('formTitle').textContent = '添加患者';
   clearForm();
   document.getElementById('formModal').classList.remove('hidden');
+  // 新增时弹窗内容滚动到最前面
+  var mc = document.querySelector('#formModal .modal-content');
+  if (mc) mc.scrollTop = 0;
 }
 
 function showEditForm(id) {
