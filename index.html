@@ -606,8 +606,13 @@ const STORE = 'patients';
 
 let _db = null;
 function openDB() {
-  return new Promise((resolve, reject) => {
+  return new Promise(function(resolve, reject) {
     var req = indexedDB.open(DB_NAME, DB_VER);
+    var timedOut = false;
+    var timer = setTimeout(function() {
+      timedOut = true;
+      reject(new Error('IndexedDB 连接超时'));
+    }, 3000);
     req.onupgradeneeded = function(e) {
       var db = e.target.result;
       if (!db.objectStoreNames.contains(STORE)) {
@@ -618,16 +623,22 @@ function openDB() {
       }
     };
     req.onsuccess = function(e) {
-      // 确保数据库已完全准备好
-      var db = e.target.result;
-      resolve(db);
+      if (!timedOut) {
+        clearTimeout(timer);
+        resolve(e.target.result);
+      }
     };
     req.onerror = function(e) {
-      reject(e.target.error);
+      if (!timedOut) {
+        clearTimeout(timer);
+        reject(e.target.error);
+      }
     };
-    // 处理数据库 blocked 情况
     req.onblocked = function() {
-      reject(new Error('IndexedDB blocked'));
+      if (!timedOut) {
+        clearTimeout(timer);
+        reject(new Error('IndexedDB blocked'));
+      }
     };
   });
 }
