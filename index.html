@@ -632,10 +632,29 @@ function openDB() {
   });
 }
 
-const dbReady = openDB().then(function(db) { _db = db; return db; });
+// 获取 IndexedDB 连接（自动重试，不依赖单次 Promise）
+async function getDB() {
+  if (_db) {
+    try {
+      // 验证连接是否仍然有效
+      _db.transaction(STORE, 'readonly');
+      return _db;
+    } catch(e) { _db = null; }
+  }
+  for (var i = 0; i < 8; i++) {
+    try {
+      var db = await openDB();
+      _db = db;
+      return db;
+    } catch(e) {
+      if (i < 7) await new Promise(function(r) { setTimeout(r, 500 + i * 200); });
+    }
+  }
+  throw new Error('IndexedDB 连接失败');
+}
 
 async function dbAdd(patient) {
-  const db = await dbReady;
+  const db = await getDB();
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE, 'readwrite');
     const req = tx.objectStore(STORE).add(patient);
@@ -645,7 +664,7 @@ async function dbAdd(patient) {
 }
 
 async function dbUpdate(patient) {
-  const db = await dbReady;
+  const db = await getDB();
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE, 'readwrite');
     const req = tx.objectStore(STORE).put(patient);
@@ -655,7 +674,7 @@ async function dbUpdate(patient) {
 }
 
 async function dbDelete(id) {
-  const db = await dbReady;
+  const db = await getDB();
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE, 'readwrite');
     const req = tx.objectStore(STORE).delete(id);
@@ -665,7 +684,7 @@ async function dbDelete(id) {
 }
 
 async function dbGetAll() {
-  const db = await dbReady;
+  const db = await getDB();
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE, 'readonly');
     const req = tx.objectStore(STORE).getAll();
@@ -675,7 +694,7 @@ async function dbGetAll() {
 }
 
 async function dbGet(id) {
-  const db = await dbReady;
+  const db = await getDB();
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE, 'readonly');
     const req = tx.objectStore(STORE).get(id);
@@ -1906,22 +1925,15 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// 页面初始化：等待 DOM + IndexedDB 均就绪后渲染列表
+// 页面初始化：激活列表标签，渲染患者列表
 function initApp() {
   // 激活列表标签页的 UI 状态
   document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
   var listTab = document.querySelector('.tab-btn:nth-child(1)');
   if (listTab) listTab.classList.add('active');
 
-  // 等 dbReady 后再列表渲染
-  dbReady.then(function() {
-    return renderList();
-  })["catch"](function(e) {
-    console.warn('初始化渲染失败，5秒后重试:', e);
-    setTimeout(function() {
-      dbReady.then(function() { return renderList(); })["catch"](function(){});
-    }, 5000);
-  });
+  // renderList 内部通过 getDB() 自动重试连接，无需额外兜底
+  renderList();
 }
 
 // 根据加载状态启动
