@@ -138,6 +138,7 @@ body{background:#f0f4f8;min-height:100vh;padding-bottom:80px}
   <div class="search-bar">
     <input type="text" id="searchInput" placeholder="🔍 搜索姓名/首字母/住院号..." oninput="doSearch()">
     <button class="search-btn" onclick="showAddForm()">+ 新增</button>
+    <button class="search-btn" onclick="renderList()" title="刷新列表" style="background:#34a853;flex:0 0 44px;padding:10px 0">🔄</button>
   </div>
 
   <!-- 数据迁移 -->
@@ -1905,8 +1906,32 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// 页面初始化：首次切换到列表标签页并渲染
-switchTab('list');
+// 页面初始化：等待 DOM 和 IndexedDB 就绪后渲染
+function initApp() {
+  switchTab('list');
+  // 兜底：1s 后如果列表还是空的但数据库有数据，重试渲染
+  setTimeout(function() {
+    try {
+      dbReady.then(function(db) {
+        var tx = db.transaction(STORE, 'readonly');
+        var req = tx.objectStore(STORE).count();
+        req.onsuccess = function() {
+          var countEl = document.getElementById('patientCount');
+          if (countEl && countEl.textContent.trim() === '共 0 位患者' && req.result > 0) {
+            renderList();
+          }
+        };
+      })["catch"](function(){});
+    } catch(e) {}
+  }, 1000);
+}
+
+// 根据加载状态启动
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
+}
 </script>
 </body>
 </html>
