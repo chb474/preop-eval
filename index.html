@@ -1937,30 +1937,29 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// 页面初始化：进入时持续自动调用renderList，直到患者列表显示出来
+// 页面初始化：激活列表标签，顺序递归重试renderList
+// 关键：每次等前一次renderList彻底完成（await getDB->dbGetAll->渲染）后，
+// 再决定是否需要重试，避免并发indexedDB.open导致阻塞
 function initApp() {
-  // 激活列表标签页的 UI 状态
   document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
   var listTab = document.querySelector('.tab-btn:nth-child(1)');
   if (listTab) listTab.classList.add('active');
 
-  // 首次渲染
-  renderList();
-  // 持续自动刷新，模拟反复点击刷新按钮，最多3秒内快速重试12次
-  var autoRefreshCount = 0;
-  var autoRefreshTimer = setInterval(function() {
-    autoRefreshCount++;
-    var listEl = document.getElementById('patientList');
-    if (listEl && listEl.children.length > 0) {
-      // 列表已经有患者了，停止自动刷新
-      clearInterval(autoRefreshTimer);
-      return;
-    }
-    renderList();
-    if (autoRefreshCount >= 12) {
-      clearInterval(autoRefreshTimer);
-    }
-  }, 250);
+  var maxRetries = 20;
+  var retryDelay = 1000;
+  function tryRender(attempt) {
+    renderList().then(function() {
+      var listEl = document.getElementById('patientList');
+      if (!listEl || (listEl.children.length === 0 && attempt < maxRetries)) {
+        setTimeout(function() { tryRender(attempt + 1); }, retryDelay);
+      }
+    })["catch"](function(e) {
+      if (attempt < maxRetries) {
+        setTimeout(function() { tryRender(attempt + 1); }, retryDelay);
+      }
+    });
+  }
+  tryRender(1);
 }
 
 // 根据加载状态启动
