@@ -1898,42 +1898,15 @@ document.addEventListener('click', function(e) {
 document.getElementById('f_date').value = new Date().toISOString().split('T')[0];
 document.getElementById('us_date').value = new Date().toISOString().split('T')[0];
 
-// Register Service Worker (force update every page load)
+// Register Service Worker — 静默注册，不卸载不刷新，避免无限重载
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.getRegistrations().then(function(regs) {
-    for (var i = 0; i < regs.length; i++) {
-      regs[i].unregister();
-    }
-  }).then(function() {
-    navigator.serviceWorker.register('sw.js?v=3', {updateViaCache: 'none'}).then(function(reg) {
-      reg.update();
-      reg.addEventListener('updatefound', function() {
-        var newWorker = reg.installing;
-        newWorker.addEventListener('statechange', function() {
-          if (newWorker.state === 'activated') {
-            window.location.reload();
-          }
-        });
-      });
-    })['catch'](function(err) {
-      // Service Worker 注册失败，不影响正常使用
-    });
+  navigator.serviceWorker.register('sw.js', {updateViaCache: 'none'})['catch'](function(err) {
+    // Service Worker 注册失败，不影响正常使用
   });
 }
-dbReady.then(function() { renderList(); });
-// 安全兜底：500ms后如果列表还是空的且数据库有数据，重新渲染
-setTimeout(function() {
-  dbReady.then(function(db) {
-    var tx = db.transaction(STORE, 'readonly');
-    var req = tx.objectStore(STORE).count();
-    req.onsuccess = function() {
-      var count = document.getElementById('patientCount');
-      if (count && count.textContent.trim() === '共 0 位患者' && req.result > 0) {
-        renderList();
-      }
-    };
-  });
-}, 500);
+
+// 页面初始化：首次切换到列表标签页并渲染
+switchTab('list');
 </script>
 </body>
 </html>
