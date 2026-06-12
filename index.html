@@ -100,6 +100,7 @@ body{background:#f0f4f8;min-height:100vh;padding-bottom:80px}
 /* Empty state */
 .empty-state{text-align:center;padding:40px 20px;color:#8e99a8}
 .empty-state svg{width:60px;height:60px;fill:#d0d6df;margin-bottom:12px}
+@keyframes spin{to{transform:rotate(360deg)}}
 .empty-state p{font-size:14px}
 /* Toast */
 .toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.78);color:#fff;padding:14px 24px;border-radius:10px;font-size:14px;z-index:999;pointer-events:none;opacity:0;transition:opacity .3s}
@@ -1937,25 +1938,31 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// 页面初始化：激活列表标签，顺序递归重试renderList
-// 关键：每次等前一次renderList彻底完成（await getDB->dbGetAll->渲染）后，
-// 再决定是否需要重试，避免并发indexedDB.open导致阻塞
+// 页面初始化：激活列表标签，快速重试渲染直到列表出现
 function initApp() {
   document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
   var listTab = document.querySelector('.tab-btn:nth-child(1)');
   if (listTab) listTab.classList.add('active');
 
-  var maxRetries = 20;
-  var retryDelay = 1000;
+  // 显示加载提示
+  var patientList = document.getElementById('patientList');
+  if (patientList) {
+    patientList.innerHTML = '<div class="empty-state" id="loadingState"><div style="margin:20px auto;width:32px;height:32px;border:3px solid #e0e4ea;border-top-color:#1a73e8;border-radius:50%;animation:spin .8s linear infinite"></div><p style="margin-top:12px;color:#666;font-size:14px">正在加载数据...</p></div>';
+  }
+
+  var maxAttempts = 10;
   function tryRender(attempt) {
     renderList().then(function() {
       var listEl = document.getElementById('patientList');
-      if (!listEl || (listEl.children.length === 0 && attempt < maxRetries)) {
-        setTimeout(function() { tryRender(attempt + 1); }, retryDelay);
+      if (listEl && listEl.children.length > 0) {
+        return; // 渲染成功
+      }
+      if (attempt < maxAttempts) {
+        setTimeout(function() { tryRender(attempt + 1); }, 300);
       }
     })["catch"](function(e) {
-      if (attempt < maxRetries) {
-        setTimeout(function() { tryRender(attempt + 1); }, retryDelay);
+      if (attempt < maxAttempts) {
+        setTimeout(function() { tryRender(attempt + 1); }, 300);
       }
     });
   }
