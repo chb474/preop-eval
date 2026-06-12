@@ -1,5 +1,7 @@
-const CACHE = 'preop-eval-v3';
+const CACHE = 'preop-eval-v4';
 const STATIC_ASSETS = [
+  './',
+  './index.html',
   './manifest.json',
   './icons/icon-192.png',
   './icons/icon-512.png'
@@ -18,15 +20,22 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
-  // 对于 HTML 文件（index.html），总是从网络获取，确保是最新版本
+  // 对于 HTML 文件，使用缓存优先，网络兜底，确保离线可用
   if (e.request.mode === 'navigate' || (e.request.url.indexOf('index.html') >= 0)) {
     e.respondWith(
-      fetch(e.request).catch(() => caches.match(e.request))
+      caches.match(e.request).then(function(cached) {
+        // 有缓存直接用缓存，保证离线也能用
+        if (cached) return cached;
+        // 没有缓存再请求网络
+        return fetch(e.request)["catch"](function() {
+          return caches.match('./');
+        });
+      })
     );
     return;
   }
   // 对于静态资源，使用缓存优先
   e.respondWith(
-    caches.match(e.request).then(r => r || fetch(e.request))
+    caches.match(e.request).then(function(r) { return r || fetch(e.request); })
   );
 });
