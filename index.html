@@ -1937,15 +1937,33 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// 页面初始化：激活列表标签，渲染患者列表
+// 页面初始化：激活列表标签，自动重试渲染直到成功
 function initApp() {
   // 激活列表标签页的 UI 状态
   document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
   var listTab = document.querySelector('.tab-btn:nth-child(1)');
   if (listTab) listTab.classList.add('active');
 
-  // renderList 内部通过 getDB() 自动重试连接，无需额外兜底
-  renderList();
+  // 自动重试：如果渲染失败或列表为空但有数据，最多重试20次
+  var renderRetries = 0;
+  var maxRenderRetries = 20;
+  function tryRender() {
+    renderRetries++;
+    renderList().then(function() {
+      // 渲染成功但列表为空，检查数据库中是否真的有数据
+      var el = document.getElementById('patientList');
+      var countEl = document.getElementById('patientCount');
+      if (el && el.children.length === 0 && countEl && countEl.textContent.trim() === '共 0 位患者' && renderRetries < maxRenderRetries) {
+        // 数据库可能还没就绪，继续重试
+        setTimeout(tryRender, 1000);
+      }
+    })["catch"](function(e) {
+      if (renderRetries < maxRenderRetries) {
+        setTimeout(tryRender, 1000);
+      }
+    });
+  }
+  tryRender();
 }
 
 // 根据加载状态启动
