@@ -1906,24 +1906,22 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// 页面初始化：等待 DOM 和 IndexedDB 就绪后渲染
+// 页面初始化：等待 DOM + IndexedDB 均就绪后渲染列表
 function initApp() {
-  switchTab('list');
-  // 兜底：1s 后如果列表还是空的但数据库有数据，重试渲染
-  setTimeout(function() {
-    try {
-      dbReady.then(function(db) {
-        var tx = db.transaction(STORE, 'readonly');
-        var req = tx.objectStore(STORE).count();
-        req.onsuccess = function() {
-          var countEl = document.getElementById('patientCount');
-          if (countEl && countEl.textContent.trim() === '共 0 位患者' && req.result > 0) {
-            renderList();
-          }
-        };
-      })["catch"](function(){});
-    } catch(e) {}
-  }, 1000);
+  // 激活列表标签页的 UI 状态
+  document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+  var listTab = document.querySelector('.tab-btn:nth-child(1)');
+  if (listTab) listTab.classList.add('active');
+
+  // 等 dbReady 后再列表渲染
+  dbReady.then(function() {
+    return renderList();
+  })["catch"](function(e) {
+    console.warn('初始化渲染失败，5秒后重试:', e);
+    setTimeout(function() {
+      dbReady.then(function() { return renderList(); })["catch"](function(){});
+    }, 5000);
+  });
 }
 
 // 根据加载状态启动
